@@ -12,14 +12,20 @@ class Solution:
     facteurZ3 = 10
     facteurZ4 = 1
 
-    def __init__(self, instance=None, Z1=facteurZ1, Z2=facteurZ2, Z3=facteurZ3, Z4=facteurZ4):
+    def __init__(self, instance=None):
         self.listTimeSlot = []
         self.instance = instance
         self.cost = 0
-        self.z1 = Z1
-        self.z2 = Z2
-        self.z3 = Z3
-        self.z4 = Z4
+        self.z1 = 0
+        self.z2 = 0
+        self.z3 = 0
+        self.z4 = 0
+
+    def getCost(self):
+        return self.cost
+
+    def getListTimeSlot(self):
+        return self.listTimeSlot
 
     def addToListTimeSlot(self, timeSlot):
         self.listTimeSlot.append(timeSlot)
@@ -31,9 +37,6 @@ class Solution:
                 break
             i += 1
         self.listTimeSlot.pop(i)
-
-    def setInstance(self, instance):
-        self.instance = instance
 
     def copy(self, solutionToCopy):
         #Copie des variables
@@ -201,7 +204,7 @@ class Solution:
         return True
 
     def toString(self, showDetailedCost = True):
-        res = "*** Solution ***\n"
+        res = "*** Solution " + self.instance.getName() + " ***\n"
         res += "- Coût de la solution = " + str(round(self.cost,2)) + "\n"
 
         if(showDetailedCost):
@@ -214,5 +217,7 @@ class Solution:
         for timeSlot in self.listTimeSlot:
             res += timeSlot.toString(i)
             i += 1
+        return res
 
-        print(res)
+    def display(self, showDetailedCost=False):
+        print(self.toString(showDetailedCost))

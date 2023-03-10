@@ -49,7 +49,6 @@ def test(iterationMax=1):
         instance = Instance("./data/" + fileName)
         nbIteration = 0
 
-
         #Modification de la durée max en fonction de l'instance
         if(fileName[0] == 'S'):
             ITER  = 3000
@@ -66,18 +65,17 @@ def test(iterationMax=1):
             alns = ALNS(instance)
             #Récupération des valeurs de la meilleure solution
             #                                                                                               ALGO_ALNS(self, N, PU, rho, sigma1,sigma2,sigma3, tau, C,   alpha,beta,gamma, Nc,  theta, Ns, showLog=False)
-            (resultat,iterationbest,Cost_best_solution,TIME,USED_METHODS_UNTIL_LAST_BEST,USED_METHODS) =  alns.ALGO_ALNS(ITER, 100, 0.3, 130, 70, 25,       0.1, 0.9995, 0.5, 0.25, 0.25, 2000, 0.5, 10, False)
+            (resultat, iterationbest, Cost_best_solution, TIME, USED_METHODS_UNTIL_LAST_BEST, USED_METHODS) =  alns.solve(ITER, 100, 0.3, 130, 70, 25,       0.1, 0.9995, 0.5, 0.25, 0.25, 2000, 0.5, 10, True)
 
             #Création de la nouvelle ligne du dataframe
             newRow = {'Instance':name,
             'Evolution_cost': Cost_best_solution,
             'Evolution_iter_best': iterationbest ,
             'Evolution_time_best' :TIME,
-            'cost_best': Cost_best_solution[len(Cost_best_solution)-1],
-            'iter_best': iterationbest[len(iterationbest)-1] ,
-            'time_best' :TIME[len(TIME)-1],
+            'cost_best': Cost_best_solution[-1],
+            'iter_best': iterationbest[-1] ,
+            'time_best' :TIME[-1],
             'Iterations':ITER }
-            print(Cost_best_solution[len(Cost_best_solution)-1])
 
             for k in USED_METHODS :
                 newRow[k] = round(100*USED_METHODS_UNTIL_LAST_BEST[k]/iterationbest[len(iterationbest)-1],1)

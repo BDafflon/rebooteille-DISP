@@ -26,6 +26,9 @@ class Instance:
         #Initialisation
         self.listClient = []
         self.timeTravel = parsingDistance(fileDistPath, distSheetName)
+        start = fileDataPath.rfind('/') + 1
+        end = fileDataPath.rfind('.')
+        self.name = fileDataPath[start:end]
 
         #Récupération du dataframe à partir de l'excel situé à l'emplacement fileDataPath
         dfInstance = pd.read_excel(fileDataPath, sheet_name=dataSheetName)
@@ -53,6 +56,8 @@ class Instance:
         self.routePerTimeSlotMax = dfInstance[0][9].astype(int)
         self.durationTimeSlotMax = dfInstance[0][11].astype(int)
 
+    def getName(self):
+        return self.name
 
     def getClientByClientId(self, clientId):
         for client in self.listClient:
@@ -62,7 +67,7 @@ class Instance:
     def toString(self, showClients=False, showTimeTravel=False):
         # showClients est un booleen correspondant à l'affichage la liste des clients
         # showTimeTravel est un booleen correspondant à l'affichage du temps de trajet
-        res = "--- Instance ---" + "\n"
+        res = "--- Instance " + self.name + " ---" + "\n"
         res += "Fixed collection time = " + str(self.fixedCollectionTime) + "\n"
         res += "Collection time per crate = " + str(self.collectionTimePerCrate) + "\n"
         res += "Vehicule velocity max = " + str(self.vehiculeVelocityMax) + "\n"

@@ -253,11 +253,11 @@ class ALNS :
             repairsMethods.repair_random_best_insertion(solution,keptinmemory, self.instance, self.repairdontwork)
 
 
-    def ALGO_ALNS(self, N, PU, rho, sigma1, sigma2, sigma3, tolerance, C, alpha, beta, gamma, Nc, theta, Ns, showLog=False):
+    def solve(self, N, PU, rho, sigma1, sigma2, sigma3, tolerance, C, alpha, beta, gamma, Nc, theta, Ns, showLog=False):
         """
         FR:
         Fonction principale. Les différentes parties sont representées dans le logigramme ou le pseudo code du rapport. Cette fonction a en argument tous les paramètres de l'algorithme et retourne la meilleure solution.
-        current solution correspond à la solution que lon modifie à chaque iteration.
+        current solution correspond à la solution que l'on modifie à chaque iteration.
         testsolution correspond à la solution gardée en mémoire à laquelle on va comparer current solution.
 
         EN :
@@ -513,6 +513,6 @@ class ALNS :
             print(Sucess_swap)
             print()
             print("BEST SOLUTION :")
-            self.bestSolution.toString()
+            self.bestSolution.display()
 
-        return (self.bestSolution,iterationbest,Cost_best_solution,TIME,USED_METHODS_UNTIL_LAST_BEST,USED_METHODS)
+        return (self.bestSolution, iterationbest, Cost_best_solution, TIME, USED_METHODS_UNTIL_LAST_BEST, USED_METHODS)
