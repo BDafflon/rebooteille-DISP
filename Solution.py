@@ -13,13 +13,28 @@ class Solution:
     facteurZ4 = 1
 
     def __init__(self, instance=None):
-        self.listTimeSlot = []
         self.instance = instance
+        self.listTimeSlot = []
         self.cost = 0
-        self.z1 = 0
-        self.z2 = 0
-        self.z3 = 0
-        self.z4 = 0
+        self.duration = 0 #Z1
+        self.requestPriorityPenalty = 0 #Z2
+        self.inventoryPriorityPenalty = 0 #Z3
+        #Z4 = len(self.listTimeSlot)
+        self.time = 0
+        self.nIter = 6000
+        self.pu = 100
+        self.rho = 0.3
+        self.sigma1 = 130
+        self.sigma2 = 70
+        self.sigma3 = 25
+        self.tau = 0.1
+        self.c = 0.9995
+        self.alpha = 0.5
+        self.beta = 0.25
+        self.gamma = 0.25
+        self.nc = 2000
+        self.theta = 0.5 #swaps
+        self.ns = 10 #swaps
 
     def getCost(self):
         return self.cost
@@ -42,10 +57,9 @@ class Solution:
         #Copie des variables
         self.instance = solutionToCopy.instance
         self.cost = solutionToCopy.cost
-        self.z1 = solutionToCopy.z1
-        self.z2 = solutionToCopy.z2
-        self.z3 = solutionToCopy.z3
-        self.z4 = solutionToCopy.z4
+        self.duration = solutionToCopy.duration
+        self.requestPriorityPenalty = solutionToCopy.requestPriorityPenalty
+        self.inventoryPriorityPenalty = solutionToCopy.inventoryPriorityPenalty
 
         #Copie des timeslots
         self.listTimeSlot = []
@@ -59,17 +73,16 @@ class Solution:
     def calculateCost(self):
         self.cost = 0
 
-        self.z1 = 0
-        self.z2 = 0
-        self.z3 = 0
-        self.z4 = 0
+        self.duration = 0
+        self.requestPriorityPenalty = 0
+        self.inventoryPriorityPenalty = 0
 
         for indiceTimeSlot in range(len(self.listTimeSlot)):
 
             timeSlot = self.listTimeSlot[indiceTimeSlot]
 
             #Calcul de Z1
-            self.z1 += timeSlot.getDuration(
+            self.duration += timeSlot.getDuration(
                 self.instance.timeTravel,
                 self.instance.fixedCollectionTime,
                 self.instance.collectionTimePerCrate
@@ -84,18 +97,18 @@ class Solution:
 
                         #Calcul de Z2
                         if(indiceTimeSlot + 1 > 1):
-                            self.z2 += (math.floor(10*(clientArrivee.getFillingRate() / clientArrivee.getCapacity())) * indiceTimeSlot)/10
+                            self.requestPriorityPenalty += (math.floor(10*(clientArrivee.getFillingRate() / clientArrivee.getCapacity())) * indiceTimeSlot)/10
 
                             #Calcul de Z3
                             if(clientArrivee.getIsRequested()):
-                                self.z3 += indiceTimeSlot
+                                self.inventoryPriorityPenalty += indiceTimeSlot
 
         #Calcul de Z4
-        self.z4 += len(self.listTimeSlot)
+        Z4 = len(self.listTimeSlot)
 
         #Calcul du coût total
-        self.cost = Solution.facteurZ1 * self.z1 + Solution.facteurZ2 * self.z2
-        self.cost += Solution.facteurZ3 * self.z3 + Solution.facteurZ4 * self.z4
+        self.cost = Solution.facteurZ1 * self.duration + Solution.facteurZ2 * self.requestPriorityPenalty
+        self.cost += Solution.facteurZ3 * self.inventoryPriorityPenalty + Solution.facteurZ4 * Z4
 
 
 
@@ -208,10 +221,10 @@ class Solution:
         res += "- Coût de la solution = " + str(round(self.cost,2)) + "\n"
 
         if(showDetailedCost):
-            res += "- Z1 = " + str(round(self.z1, 2)) + "\n"
-            res += "- Z2 = " + str(round(self.z2, 2)) + "\n"
-            res += "- Z3 = " + str(self.z3) + "\n"
-            res += "- Z4 = " + str(self.z4) + "\n"
+            res += "- Z1 = " + str(round(self.duration, 2)) + "\n"
+            res += "- Z2 = " + str(round(self.requestPriorityPenalty, 2)) + "\n"
+            res += "- Z3 = " + str(self.inventoryPriorityPenalty) + "\n"
+            res += "- Z4 = " + str(len(self.listTimeSlot)) + "\n"
 
         i = 1
         for timeSlot in self.listTimeSlot:

@@ -22,6 +22,7 @@ class ALNS :
     def __init__(self, instance, dureeMax = None) :
         #Initialisation de l'instance
         self.instance = instance
+        self.nIter = (len(instance.listClient)-1)/2*1000
 
         #Initialisation des solutions utilisées
         self.bestSolution = Solution(self.instance)
@@ -38,9 +39,43 @@ class ALNS :
         #nombre de fois où les repair marchent pas et on repart de la solution gardee en memoire
         self.repairdontwork = {}
 
+        # Listes des noms des methodes de destruction
+        # "destroy_route",
+        # "destroy_random",
+        # "destroy_worst_clients",
+        # "destroy_related_clients",
+        # "destroy_related_client_by_distance",
+        # "destroy_Client_with_a_request_placed_at_the_end_of_the_solution",
+        # "destroy_Client_with_a_high_ratio_placed_at_the_end_of_the_solution"
+        self.destroy_methods = [ "destroy_route",
+                                 "destroy_random",
+                                 "destroy_worst_clients",
+                                 "destroy_Client_with_a_high_ratio_placed_at_the_end_of_the_solution",
+                                 "destroy_Client_with_a_request_placed_at_the_end_of_the_solution"        ]
+
+        # Listes des noms des methodes de repair
+        #"repair_randomV2",
+        #"repair_randomv1",
+        #"repair_2_regret",
+        #"repair_random_best_insertion" ,
+        #"repair_max_ratio_best_insertion" ,      `
+        #"repair_FirstPositionAvailable_randomlistClient",
+        #"repair_FirstPositionAvailable_maxratio_listClient"
+        self.repair_methods = [ "repair_2_regret",
+                                "repair_randomv1",
+                                "repair_random_best_insertion",
+                                "repair_max_ratio_best_insertion" ,
+                                "repair_FirstPositionAvailable_maxratio_listClient" ]
+
+        self.repairdontwork = {}
+        self.weights_destroy = {}
+        self.weights_repair ={}
+        self.USED_METHODS = {}
+        self.USED_METHODS_UNTIL_LAST_BEST = {}
+        self.sucess_swap = {}
 
 
-    def createSolution(self, listClient):
+    def createSolution(self):
         '''
         FR :
         Méthode de création d'une solution basique
@@ -57,6 +92,7 @@ class ALNS :
         Otherwise we create another time slot
         '''
         #Initialisation des variables
+        listClient = methods.order_ListClient_random(self.instance.listClient.copy())
         allClientHasBeenPlaced = False
         clientNotPlaced = False
 
@@ -165,15 +201,8 @@ class ALNS :
             client.setnotVisited()
 
         if(not self.currentSolution.checkSolution()):
-            #Shuffle de la liste sans le dépôt de départ et d'arrivée
-            listClientSansDepot = listClient[1:]
-            listClientSansDepot = methods.order_ListClient_random(listClientSansDepot)
-
-            #Réassignation de la liste avec le dépôt a la première place
-            listClient = [listClient[0]] + listClientSansDepot
-
             #Création d'une nouvelle solution de départ
-            self.createSolution(listClient)
+            self.createSolution()
 
 
 
@@ -253,7 +282,7 @@ class ALNS :
             repairsMethods.repair_random_best_insertion(solution,keptinmemory, self.instance, self.repairdontwork)
 
 
-    def solve(self, N, PU, rho, sigma1, sigma2, sigma3, tolerance, C, alpha, beta, gamma, Nc, theta, Ns, showLog=False):
+    def solve(self, PU, rho, sigma1, sigma2, sigma3, tolerance, C, alpha, beta, gamma, Nc, theta, Ns, showLog=False):
         """
         FR:
         Fonction principale. Les différentes parties sont representées dans le logigramme ou le pseudo code du rapport. Cette fonction a en argument tous les paramètres de l'algorithme et retourne la meilleure solution.
@@ -265,82 +294,52 @@ class ALNS :
         current solution corresponds to the solution that we modify at each iteration.
         testsolution corresponds to the solution kept in memory to which we will compare current solution.
         """
+        print("Solving " + self.instance.getName())
         # INITIALISATION DU TEMPS
         initialTime = time.perf_counter()
 
         # INITIALISATION DES SOLUTIONS
-        listClient = methods.order_ListClient_random(self.instance.listClient.copy())
-
-        self.createSolution(self.instance.listClient)
+        self.createSolution()
         self.bestSolution.copy(self.currentSolution)
         self.testSolution.copy(self.currentSolution)
 
         # INITIALISATION DES VARIABLES
         T0 = ( tolerance *  self.currentSolution.cost )  /  math.log(2)  # temperature initiale
-        nbIteration = 0  # nombre d'iterations
-        iterationMaxSinceLastBest = Nc  # nombre d'iterations maximum avant de reinitialiser la solution
-        nbIterationSinceLastBest = 0  # nombre d'iterations avant de reinitialiser la solution
+        nbIteration = 0 # nombre d'iterations
+        iterationMaxSinceLastBest = Nc # nombre d'iterations maximum avant de reinitialiser la solution
+        nbIterationSinceLastBest = 0 # nombre d'iterations avant de reinitialiser la solution
         self.onremontelapente = 0 # Nombre de fois que l'on accepte une solution moins bonne
-        iterationbest=[0] # iterations où on ameliore la meilleure solution
-        TIME=[0] # temps où on ameliore la meilleure solution
-
+        self.evolution_iter_best=[nbIteration] # iterations où on ameliore la meilleure solution
+        self.evolution_time_best=[nbIteration] # temps où on ameliore la meilleure solution
         self.bestSolution.calculateCost()
-        Cost_best_solution=[round(self.bestSolution.cost,2)] # evolution du cout de la meilleure solution
+        self.evolution_cost=[round(self.bestSolution.cost,2)] # evolution du cout de la meilleure solution
+
+        self.repairdontwork = {i : 0 for i in self.repair_methods}
+
+        # INITIALISATION DES POIDS POUR LA "ROULETTE WHEEL SELECTION"
+        # initialement meme poids pour toutes les methodes
+        self.weights_destroy = {i : 1/len(self.destroy_methods) for i in self.destroy_methods}
+        self.weights_repair ={i : 1/len(self.repair_methods) for i in self.repair_methods}
+
+        Success_destroy = {i : 0 for i in self.destroy_methods}
+        Used_destroy_methods = {i : 0 for i in self.destroy_methods}
+
+        Success_repair = {i : 0 for i in self.repair_methods}
+        Used_repair_methods = {i : 0 for i in self.repair_methods}
+
+        # dictionnaires avec pour clé le nom de la methode et pour valeur le nombre de fois que l'on utilise une methode en s'arretant à la derniere meilleure solution
+        self.USED_METHODS = {i : 0 for i in self.destroy_methods+self.repair_methods }
+        self.USED_METHODS_UNTIL_LAST_BEST = {}
+
+        self.sucess_swap = {'swap_inter_route':0, 'swap_intra_route':0}
+
 
         #Headers de l'affichage de recherche de solution
         if(showLog):
-            print("Nb iteration", "Clock" , "Best solution","nb de solutions moins bonnes acceptées", sep = '\t')
+            print("Nb iteration", "Clock" , "Best solution","Nb de solutions moins bonnes acceptées", sep = '\t')
 
-        # Listes des noms des methodes de destruction
-        # "destroy_route",
-        # "destroy_random",
-        # "destroy_worst_clients",
-        # "destroy_related_clients",
-        # "destroy_related_client_by_distance",
-        # "destroy_Client_with_a_request_placed_at_the_end_of_the_solution",
-        # "destroy_Client_with_a_high_ratio_placed_at_the_end_of_the_solution"
-
-        destroy_methods = [ "destroy_route",
-                            "destroy_random",
-                            "destroy_worst_clients",
-                            "destroy_Client_with_a_high_ratio_placed_at_the_end_of_the_solution",
-                            "destroy_Client_with_a_request_placed_at_the_end_of_the_solution"        ]
-
-        # Listes des noms des methodes de repair
-        #"repair_randomV2",
-        #"repair_randomv1",
-        #"repair_2_regret",
-        #"repair_random_best_insertion" ,
-        #"repair_max_ratio_best_insertion" ,      `
-        #"repair_FirstPositionAvailable_randomlistClient",
-        #"repair_FirstPositionAvailable_maxratio_listClient"
-
-        repair_methods = [ "repair_2_regret",
-                           "repair_randomv1",
-                           "repair_random_best_insertion",
-                           "repair_max_ratio_best_insertion" ,
-                           "repair_FirstPositionAvailable_maxratio_listClient"      ]
-
-        self.repairdontwork = {i : 0 for i in repair_methods}
-
-        # INITIALISATION DES POIDS POUR LA "ROULETTE WHEEL SELECTION"
-        Weights_destroy = {i : 1/len(destroy_methods) for i in destroy_methods} # poids des methodes de destroy. Initialement tous les poids sont les memes
-        Weights_repair ={i : 1/len(repair_methods) for i in repair_methods} # poids des methodes de repair. Initialement tous les poids sont les memes
-
-        Success_destroy = {i : 0 for i in destroy_methods} # dictionnaire avec pour clé le nom de la methode et pour valeur son score de reussite
-        Used_destroy_methods = {i : 0 for i in destroy_methods}#=  dictionnaire avec pour clé le nom de la methode et pour valeur son score d'utilisation
-
-        Success_repair = {i : 0 for i in repair_methods}#= dictionnaire avec pour clé le nom de la methode et pour valeur son score de reussite
-        Used_repair_methods = {i : 0 for i in repair_methods}#=  dictionnaire avec pour clé le nom de la methode et pour valeur son score d'utilisation
-
-
-        USED_METHODS = {i : 0 for i in destroy_methods+repair_methods }  # dictionnaire avec pour clé le nom de la methode et pour valeut le Nombre de fois que l'on utilise une methode
-        USED_METHODS_UNTIL_LAST_BEST = {}  # dictionnaire avec pour clé le nom de la methode et pour valeur le Nombre de fois que l'on utilise une methode en s'arretant à la derniere meilleure solution
-
-        Sucess_swap = {'swap_inter_route':0, 'swap_intra_route':0} # compteur de reussite des swaps
-
-        # CRITERE D'ARRET : N iterations maximum :
-        while nbIteration < N:
+        # CRITERE D'ARRET : nIter iterations maximum :
+        while nbIteration < self.nIter:
             # VERIFICATION QUE L'ON AMELIORE LA BEST SOLUTION
             if(nbIterationSinceLastBest >= iterationMaxSinceLastBest):
                 # Si on ameliore pas la best solution, alors on recommence en cherchant avec une nouvelle solution de départ en mélangeant la liste de création de la solution
@@ -348,15 +347,8 @@ class ALNS :
                 #Réinitialisation du compteur
                 nbIterationSinceLastBest = 0
 
-                #Shuffle de la liste sans le dépôt
-                listClientSansDepot = listClient[1:]
-                listClientSansDepot = methods.order_ListClient_random(listClientSansDepot)
-
-                #Réassignation de la liste avec le dépôt à la première place
-                listClient = [listClient[0]] + listClientSansDepot
-
                 #Création d'une nouvelle solution de départ
-                self.createSolution(listClient)
+                self.createSolution()
 
                 #Mise à jour de la solution de test
                 if(self.currentSolution.checkSolution()):
@@ -367,16 +359,16 @@ class ALNS :
             degres_destruction = random.randint(math.ceil(0.1*len(self.instance.listClient)),math.ceil(0.2*len(self.instance.listClient))) # degrès de destruction faible pour detruire peu (ameliore le temps de calcul)
             #degres_destruction = random.randint(math.ceil(0.1*len(self.instance.listClient)),math.ceil(0.4*len(self.instance.listClient))) # degrès de destruction plus fort pour detruire plus de clients (allonge le temps de calcul mais permet plus de diversité dans les solutions)
 
-            destroy_method = methods.choose_destroy_method(destroy_methods,Weights_destroy)
+            destroy_method = methods.choose_destroy_method(self.destroy_methods,self.weights_destroy)
 
             Used_destroy_methods[destroy_method] += 1
-            USED_METHODS[destroy_method] += 1
+            self.USED_METHODS[destroy_method] += 1
 
             # CHOIX D'UN OPERATEUR DE RECONSTRUCTION
-            repair_method = methods.choose_repair_method(repair_methods,Weights_repair)
+            repair_method = methods.choose_repair_method(self.repair_methods,self.weights_repair)
 
             Used_repair_methods[repair_method] += 1
-            USED_METHODS[repair_method] += 1
+            self.USED_METHODS[repair_method] += 1
 
             # MODIFICATION DE LA SOLUTION
             self.keptinmemory.copy(self.currentSolution)  # on garde en memoire la current solution avant qu'elle soit modifiée, car si les fonction ne marchent pas, on repart de cette solution
@@ -405,7 +397,7 @@ class ALNS :
 
                     if self.currentSolution.cost < self.keptinmemory.cost : # si le swap ameliore la solution on la garde en memoire
                         self.keptinmemory.copy(self.currentSolution)
-                        Sucess_swap['swap_inter_route']+=1
+                        self.sucess_swap['swap_inter_route']+=1
 
                     # SWAP de deux clients au hasard dans la solution
                     methods.swap_intra_route(self.currentSolution)
@@ -414,7 +406,7 @@ class ALNS :
                         self.currentSolution.copy(self.keptinmemory)
                     else :
                         self.keptinmemory.copy(self.currentSolution) # si le swap ameliore la solution on la garde en memoire
-                        Sucess_swap['swap_intra_route']+=1
+                        self.sucess_swap['swap_intra_route']+=1
             print("after swap")
             """
 
@@ -444,11 +436,11 @@ class ALNS :
 
                     # mise a jour des variables d'informations
 
-                    Cost_best_solution.append(round(self.bestSolution.cost,2)   )
-                    TIME.append(round(time.perf_counter() - initialTime,3))
-                    USED_METHODS_UNTIL_LAST_BEST = copy.deepcopy(USED_METHODS)
+                    self.evolution_cost.append(round(self.bestSolution.cost,2)   )
+                    self.evolution_time_best.append(round(time.perf_counter() - initialTime,3))
+                    self.USED_METHODS_UNTIL_LAST_BEST = copy.deepcopy(self.USED_METHODS)
                     nbIterationSinceLastBest = 0
-                    iterationbest.append(nbIteration+1)
+                    self.evolution_iter_best.append(nbIteration+1)
 
                 elif  self.bestSolution.cost < self.currentSolution.cost < self.testSolution.cost :
                     # si la solution ameliore la testsolution (la solution courrante gardée en memoire), on met a jour uniquement testsolution et on recompense les methodes qui ont reussi par la quantite sigma2
@@ -466,53 +458,45 @@ class ALNS :
 
             # A T ON ATTEINT Pu ITERATIONS ?== 0  : Si oui : changements des probabilités associées a chaque methode
             if (nbIteration+1)%PU == 0 :
-                Weights_destroy,Weights_repair = methods.update_weights(rho,Weights_destroy,Weights_repair,Success_destroy,Success_repair,Used_destroy_methods,Used_repair_methods)
+                self.weights_destroy, self.weights_repair = methods.update_weights(rho, self.weights_destroy, self.weights_repair, Success_destroy, Success_repair, Used_destroy_methods, Used_repair_methods)
 
-                Success_destroy = {i:0 for i in destroy_methods}
-                Success_repair = {i:0 for i in repair_methods}
+                Success_destroy = {i:0 for i in self.destroy_methods}
+                Success_repair = {i:0 for i in self.repair_methods}
 
-                Used_destroy_methods = {i:0 for i in destroy_methods}
-                Used_repair_methods = {i:0 for i in repair_methods}
+                Used_destroy_methods = {i:0 for i in self.destroy_methods}
+                Used_repair_methods = {i:0 for i in self.repair_methods}
 
             # mise à jour du nombre d'iterations
             nbIteration += 1
             nbIterationSinceLastBest += 1
 
             if(showLog and nbIteration % self.frequenceAffichage == 0):
-                print(nbIteration, "           ", round(time.perf_counter()- initialTime, 2), "  ", round(self.bestSolution.cost, 2), "               ",self.onremontelapente)
+                print("{nIter}\t\t{time}\t{cost}\t\t{nbr}".format(nIter=nbIteration,
+                                                                time=round(time.perf_counter()- initialTime, 2),
+                                                                cost=round(self.bestSolution.cost, 2),
+                                                                nbr=self.onremontelapente))
                 self.onremontelapente=0
 
+        return self.bestSolution
 
-        if(showLog):
-            print()
-            print("Nombre de fois ou les repair ne marchent pas et on repart de la solution gardee en memoire:")
-            print(self.repairdontwork)
-            print()
-            print("Iterations où on ameliore la meilleure solution:")
-            print(iterationbest)
-            print()
-            print("Temps où on ameliore la meilleure solution:")
-            print(TIME)
-            print()
-            print("Evolution du cout de la meilleure solution")
-            print(Cost_best_solution )
-            print()
-            print("Utilisation des methodes jusqu'a la derniere meilleure solution : ")
-            print(USED_METHODS_UNTIL_LAST_BEST)
-            print()
-            print("Utilisation des methodes : ")
-            print(USED_METHODS)
-            print()
-            print("poids des methodes de destructions : ")
-            print(Weights_destroy)
-            print()
-            print("poids des methodes de repair: ")
-            print(Weights_repair)
-            print()
-            print("Succes des swaps")
-            print(Sucess_swap)
-            print()
-            print("BEST SOLUTION :")
-            self.bestSolution.display()
-
-        return (self.bestSolution, iterationbest, Cost_best_solution, TIME, USED_METHODS_UNTIL_LAST_BEST, USED_METHODS)
+    def display(self):
+        print("## Nombre de fois ou les repair ne marchent pas et on repart de la solution gardee en memoire :")
+        print(self.repairdontwork)
+        print("## Iterations où on ameliore la meilleure solution :")
+        print(self.evolution_iter_best)
+        print("## Temps où on ameliore la meilleure solution :")
+        print(self.evolution_time_best)
+        print("## Evolution du cout de la meilleure solution :")
+        print(self.evolution_cost)
+        print("## Utilisation des methodes jusqu'a la derniere meilleure solution :")
+        print(self.USED_METHODS_UNTIL_LAST_BEST)
+        print("## Utilisation des methodes :")
+        print(self.USED_METHODS)
+        print("## Poids des methodes de destructions :")
+        print(self.weights_destroy)
+        print("## Poids des methodes de repair :")
+        print(self.weights_repair)
+        print("## Succes des swaps")
+        print(self.sucess_swap)
+        print("### BEST SOLUTION :")
+        self.bestSolution.display()

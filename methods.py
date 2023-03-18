@@ -13,7 +13,6 @@ def order_ListClient_random(listClient):
         Method to sort the list of destroyed clients randomly
         """
         isDepotToAdd = False
-
         if(len(listClient) > 0):
             if(listClient[0].getIndice() == 0):
                 clientDepot = listClient[0]
@@ -24,6 +23,7 @@ def order_ListClient_random(listClient):
 
             if(isDepotToAdd):
                 listClient = [clientDepot] + listClient
+
         #On retourne la liste initiale mélangée
         return listClient
 
