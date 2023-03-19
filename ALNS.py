@@ -214,7 +214,7 @@ class ALNS :
         EN :
         Returns True if the solution is accepted and False otherwise.
         """
-        return self.currentSolution.cost < self.testSolution.cost
+        return self.currentSolution.getCost() < self.testSolution.getCost()
 
 
 
@@ -226,9 +226,7 @@ class ALNS :
         EN :
         Returns True if the solution is accepted and False otherwise. We have the possibility here to accept a worst solution with probability p
         """
-        self.currentSolution.calculateCost()
-        self.testSolution.calculateCost()
-        delta = self.currentSolution.cost - self.testSolution.cost
+        delta = self.currentSolution.getCost() - self.testSolution.getCost()
         if delta <= 0 :
             return True
         else :
@@ -267,19 +265,19 @@ class ALNS :
             destroyMethods.destroy_route(solution, self.instance.listClient[0])
 
         if repair_method == "repair_2_regret" :
-            repairsMethods.repair_2_regret(solution,keptinmemory, self.instance, self.repairdontwork)
+            repairsMethods.repair_2_regret(solution, keptinmemory, self.instance, self.repairdontwork)
         if repair_method == "repair_max_ratio_best_insertion" :
-            repairsMethods.repair_max_ratio_best_insertion(solution,keptinmemory, self.instance, self.repairdontwork)
+            repairsMethods.repair_max_ratio_best_insertion(solution, keptinmemory, self.instance, self.repairdontwork)
         if repair_method == "repair_FirstPositionAvailable_randomlistClient" :
-            repairsMethods.repair_FirstPositionAvailable_randomlistClient(solution,keptinmemory, self.instance,  self.repairdontwork)
+            repairsMethods.repair_FirstPositionAvailable_randomlistClient(solution, keptinmemory, self.instance,  self.repairdontwork)
         if repair_method == "repair_randomv1" :
-            repairsMethods.repair_randomv1(solution,keptinmemory, self.instance, self.repairdontwork)
+            repairsMethods.repair_randomv1(solution, keptinmemory, self.instance, self.repairdontwork)
         if repair_method == "repair_randomV2" :
-            repairsMethods.repair_randomV2(solution,keptinmemory, self.instance, self.repairdontwork)
+            repairsMethods.repair_randomV2(solution, keptinmemory, self.instance, self.repairdontwork)
         if repair_method == "repair_FirstPositionAvailable_maxratio_listClient" :
-            repairsMethods.repair_FirstPositionAvailable_maxratio_listClient(solution,keptinmemory, self.instance, self.repairdontwork)
+            repairsMethods.repair_FirstPositionAvailable_maxratio_listClient(solution, keptinmemory, self.instance, self.repairdontwork)
         if repair_method == "repair_random_best_insertion" :
-            repairsMethods.repair_random_best_insertion(solution,keptinmemory, self.instance, self.repairdontwork)
+            repairsMethods.repair_random_best_insertion(solution, keptinmemory, self.instance, self.repairdontwork)
 
 
     def solve(self, PU, rho, sigma1, sigma2, sigma3, tolerance, C, alpha, beta, gamma, Nc, theta, Ns, showLog=False):
@@ -304,15 +302,14 @@ class ALNS :
         self.testSolution.copy(self.currentSolution)
 
         # INITIALISATION DES VARIABLES
-        T0 = ( tolerance *  self.currentSolution.cost )  /  math.log(2)  # temperature initiale
+        T0 = ( tolerance *  self.currentSolution.getCost() )  /  math.log(2)  # temperature initiale
         nbIteration = 0 # nombre d'iterations
         iterationMaxSinceLastBest = Nc # nombre d'iterations maximum avant de reinitialiser la solution
         nbIterationSinceLastBest = 0 # nombre d'iterations avant de reinitialiser la solution
         self.onremontelapente = 0 # Nombre de fois que l'on accepte une solution moins bonne
         self.evolution_iter_best=[nbIteration] # iterations où on ameliore la meilleure solution
         self.evolution_time_best=[nbIteration] # temps où on ameliore la meilleure solution
-        self.bestSolution.calculateCost()
-        self.evolution_cost=[round(self.bestSolution.cost,2)] # evolution du cout de la meilleure solution
+        self.evolution_cost=[round(self.bestSolution.getCost(), 2)] # evolution du cout de la meilleure solution
 
         self.repairdontwork = {i : 0 for i in self.repair_methods}
 
@@ -340,33 +337,36 @@ class ALNS :
 
         # CRITERE D'ARRET : nIter iterations maximum :
         while nbIteration < self.nIter:
+            if(showLog and nbIteration % self.frequenceAffichage == 0):
+                print("{nIter}\t\t{time}\t{cost}\t\t{nbr}".format(nIter=nbIteration,
+                                                                time=round(time.perf_counter()- initialTime, 2),
+                                                                cost=round(self.bestSolution.getCost(), 2),
+                                                                nbr=self.onremontelapente))
+                self.onremontelapente=0
+
             # VERIFICATION QUE L'ON AMELIORE LA BEST SOLUTION
             if(nbIterationSinceLastBest >= iterationMaxSinceLastBest):
                 # Si on ameliore pas la best solution, alors on recommence en cherchant avec une nouvelle solution de départ en mélangeant la liste de création de la solution
-
-                #Réinitialisation du compteur
+                ## Réinitialisation du compteur
                 nbIterationSinceLastBest = 0
-
-                #Création d'une nouvelle solution de départ
+                ## Création d'une nouvelle solution de départ
                 self.createSolution()
-
-                #Mise à jour de la solution de test
+                ## Mise à jour de la solution de test
                 if(self.currentSolution.checkSolution()):
                     self.testSolution.copy(self.currentSolution)
 
 
             # CHOIX D'UN OPERATEUR DE DESTRUCTION
-            degres_destruction = random.randint(math.ceil(0.1*len(self.instance.listClient)),math.ceil(0.2*len(self.instance.listClient))) # degrès de destruction faible pour detruire peu (ameliore le temps de calcul)
-            #degres_destruction = random.randint(math.ceil(0.1*len(self.instance.listClient)),math.ceil(0.4*len(self.instance.listClient))) # degrès de destruction plus fort pour detruire plus de clients (allonge le temps de calcul mais permet plus de diversité dans les solutions)
+            deg = 0.2 #degrès de destruction faible pour detruire peu (ameliore le temps de calcul)
+                 #0.4 degrès de destruction plus fort pour detruire plus de clients (allonge le temps de calcul mais permet plus de diversité dans les solutions)
+            degres_destruction = random.randint(math.ceil(0.1*len(self.instance.listClient)),math.ceil(deg*len(self.instance.listClient)))
 
-            destroy_method = methods.choose_destroy_method(self.destroy_methods,self.weights_destroy)
-
+            destroy_method = methods.choose_destroy_method(self.destroy_methods, self.weights_destroy)
             Used_destroy_methods[destroy_method] += 1
             self.USED_METHODS[destroy_method] += 1
 
             # CHOIX D'UN OPERATEUR DE RECONSTRUCTION
-            repair_method = methods.choose_repair_method(self.repair_methods,self.weights_repair)
-
+            repair_method = methods.choose_repair_method(self.repair_methods, self.weights_repair)
             Used_repair_methods[repair_method] += 1
             self.USED_METHODS[repair_method] += 1
 
@@ -374,7 +374,7 @@ class ALNS :
             self.keptinmemory.copy(self.currentSolution)  # on garde en memoire la current solution avant qu'elle soit modifiée, car si les fonction ne marchent pas, on repart de cette solution
             #self.keptinmemory.copy(self.bestSolution) # on garde en memoire la best solution avant que la current solution soit modifiée, car si les fonction ne marchent pas, on repart de la best solution
 
-            self.modification(self.currentSolution,destroy_method,degres_destruction,repair_method,self.keptinmemory,alpha,beta,gamma)
+            self.modification(self.currentSolution, destroy_method, degres_destruction, repair_method, self.keptinmemory, alpha, beta, gamma)
 
             if not self.currentSolution.checkSolution() :
                 self.currentSolution.copy(self.keptinmemory)
@@ -384,7 +384,7 @@ class ALNS :
             # ATTEINT-ON LA CONDITION POUR FAIRE LES SWAPS ?
             """
             print("before swap")
-            if self.currentSolution.cost < ( 1+ theta ) * self.testSolution.cost :
+            if self.currentSolution.getCost() < ( 1+ theta ) * self.testSolution.getCost() :
                 print("in swap")
                 # ON REALISE Ns SWAPS DE CHAQUE TYPE : 'swap_inter_route' & 'swap_intra_route'
                 for k in range(Ns) :
@@ -392,26 +392,20 @@ class ALNS :
                     # SWAP de deux clients au sein d'une route
                     methods.swap_inter_route(self.currentSolution)
 
-                    self.currentSolution.calculateCost()
-                    self.keptinmemory.calculateCost()
-
-                    if self.currentSolution.cost < self.keptinmemory.cost : # si le swap ameliore la solution on la garde en memoire
+                    if self.currentSolution.getCost() < self.keptinmemory.getCost() : # si le swap ameliore la solution on la garde en memoire
                         self.keptinmemory.copy(self.currentSolution)
                         self.sucess_swap['swap_inter_route']+=1
 
                     # SWAP de deux clients au hasard dans la solution
                     methods.swap_intra_route(self.currentSolution)
 
-                    if self.currentSolution.cost > self.keptinmemory.cost : # si le swap deteriore la solution, on repaart de celle juste avant
+                    if self.currentSolution.getCost() > self.keptinmemory.getCost() : # si le swap deteriore la solution, on repaart de celle juste avant
                         self.currentSolution.copy(self.keptinmemory)
                     else :
                         self.keptinmemory.copy(self.currentSolution) # si le swap ameliore la solution on la garde en memoire
                         self.sucess_swap['swap_intra_route']+=1
             print("after swap")
             """
-
-            self.currentSolution.calculateCost()
-            self.keptinmemory.calculateCost()
 
             # VERIFICATION DE LA SOLUTION (CONTRAINTES)
             if not self.currentSolution.checkSolution() :
@@ -424,7 +418,7 @@ class ALNS :
 
             if self.acceptance_criteria_simulated_annealing(T0,C,nbIteration) :
 
-                if self.currentSolution.cost < self.bestSolution.cost :
+                if self.currentSolution.getCost() < self.bestSolution.getCost() :
                     # si la solution ameliore la bestsolution, on met a jour testsolution est bestsolution et on recompense les methodes qui ont reussi par la quantite sigma1
                     self.testSolution.copy(self.currentSolution)
                     self.bestSolution.copy(self.currentSolution)
@@ -432,24 +426,22 @@ class ALNS :
                     Success_destroy[destroy_method] += sigma1
                     Success_repair[repair_method] += sigma1
 
-                    self.bestSolution.calculateCost()
-
                     # mise a jour des variables d'informations
 
-                    self.evolution_cost.append(round(self.bestSolution.cost,2)   )
+                    self.evolution_cost.append(round(self.bestSolution.getCost(), 2)   )
                     self.evolution_time_best.append(round(time.perf_counter() - initialTime,3))
                     self.USED_METHODS_UNTIL_LAST_BEST = copy.deepcopy(self.USED_METHODS)
                     nbIterationSinceLastBest = 0
                     self.evolution_iter_best.append(nbIteration+1)
 
-                elif  self.bestSolution.cost < self.currentSolution.cost < self.testSolution.cost :
+                elif  self.bestSolution.getCost() < self.currentSolution.getCost() < self.testSolution.getCost() :
                     # si la solution ameliore la testsolution (la solution courrante gardée en memoire), on met a jour uniquement testsolution et on recompense les methodes qui ont reussi par la quantite sigma2
                     self.testSolution.copy(self.currentSolution)
 
                     Success_destroy[destroy_method] += sigma2
                     Success_repair[repair_method] += sigma2
 
-                elif self.currentSolution.cost !=  self.testSolution.cost :
+                elif self.currentSolution.getCost() !=  self.testSolution.getCost() :
                     # si la solution n'ameliore rien mais qu'elle est acceptée par l'acceptance criteria (cas ou on accepte une solution moins bonne avec le simulated annealing), on met a jour uniquement testsolution et on recompense les methodes par la quantite sigma3
                     self.testSolution.copy(self.currentSolution)
 
@@ -469,13 +461,6 @@ class ALNS :
             # mise à jour du nombre d'iterations
             nbIteration += 1
             nbIterationSinceLastBest += 1
-
-            if(showLog and nbIteration % self.frequenceAffichage == 0):
-                print("{nIter}\t\t{time}\t{cost}\t\t{nbr}".format(nIter=nbIteration,
-                                                                time=round(time.perf_counter()- initialTime, 2),
-                                                                cost=round(self.bestSolution.cost, 2),
-                                                                nbr=self.onremontelapente))
-                self.onremontelapente=0
 
         return self.bestSolution
 

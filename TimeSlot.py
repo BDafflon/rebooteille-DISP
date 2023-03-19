@@ -48,15 +48,14 @@ class TimeSlot:
             route.copy(routeToCopy)
             self.addToListRoute(route)
 
-    def toString(self, positionInList = ""):
+    def display(self, positionInList = ""):
         i = 1
-        res = "*** Time slot " + str(positionInList) + " ***" + "\n"
-        res += "\t- Duration = " + str(round(self.duration,2)) + "\n"
-        res += "\t- Nombre de routes = " + str(len(self.listRoute)) + "\n"
+        print("*** Time slot {i} ***".format(i=positionInList))
+        print("\t- Duration = {d}".format(d=round(self.duration,2)))
+        print("\t- Nombre de routes = {r}".format(r=len(self.listRoute)))
         for route in self.listRoute:
-            res += route.toString(i)
+            route.display(i)
             if (i < len(self.listRoute)):
-                res += "\n" + "\n"
-            i = i + 1
-        res += "\n"
-        return res
+                print()
+            i += 1
+        print()

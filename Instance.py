@@ -64,30 +64,24 @@ class Instance:
             if(client.getIndice() == clientId):
                 return client
 
-    def toString(self, showClients=False, showTimeTravel=False):
-        # showClients est un booleen correspondant à l'affichage la liste des clients
-        # showTimeTravel est un booleen correspondant à l'affichage du temps de trajet
-        res = "--- Instance " + self.name + " ---" + "\n"
-        res += "Fixed collection time = " + str(self.fixedCollectionTime) + "\n"
-        res += "Collection time per crate = " + str(self.collectionTimePerCrate) + "\n"
-        res += "Vehicule velocity max = " + str(self.vehiculeVelocityMax) + "\n"
-        res += "Vehicule capacity max = " + str(self.vehiculeCapacityMax) + "\n"
-        res += "Routes per time slot max = " + str(self.routePerTimeSlotMax) + "\n"
-        res += "Number time slot max = " + str(self.numberTimeSlotMax) + "\n"
-        res += "Duration time slot max = " + str(self.durationTimeSlotMax)
-
-        if(showClients):
-            res +="\nList of client :\n"
-            for client in self.listClient:
-                res += client.toString() + "\n"
-
-        if(showTimeTravel):
-            res += "\nTime travel :\n"
-            for cle, valeur in self.timeTravel.items():
-                res += "\t- " + str(cle) + " : " + str(valeur) + "\n"
-        return res
-
     def display(self, showClients=False, showTimeTravel=False):
         # showClients est un booleen correspondant à l'affichage la liste des clients
         # showTimeTravel est un booleen correspondant à l'affichage du temps de trajet
-        print(self.toString(showClients, showTimeTravel))
+        print("--- Instance {name} ---".format(name=self.name))
+        print("Fixed collection time = {fct}".format(fct=self.fixedCollectionTime))
+        print("Collection time per crate = {ctc}".format(ctc=self.collectionTimePerCrate))
+        print("Vehicule velocity max = {vv}".format(vv=self.vehiculeVelocityMax))
+        print("Vehicule capacity max = {vc}".format(vc=self.vehiculeCapacityMax))
+        print("Routes per time slot max = {rts}".format(rts=self.routePerTimeSlotMax))
+        print("Number time slot max = {nts}".format(nts=self.numberTimeSlotMax))
+        print("Duration time slot max = {dts}".format(dts=self.durationTimeSlotMax))
+        
+        if(showClients):
+            print("* List of client :")
+            for client in self.listClient:
+                client.display()
+
+        if(showTimeTravel):
+            print("* Time travel :")
+            for cle, valeur in self.timeTravel.items():
+                print("\t-{cle} : {valeur}".format(cle=cle, valeur=valeur))

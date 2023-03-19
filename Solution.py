@@ -4,6 +4,7 @@ Code from project ALNS 2022, ALEXI OMAR DJAMA
 from Instance import Instance
 from TimeSlot import TimeSlot
 import math
+from checkSolution import check
 
 class Solution:
 
@@ -16,6 +17,7 @@ class Solution:
         self.instance = instance
         self.listTimeSlot = []
         self.cost = 0
+        self.updateCost = False
         self.duration = 0 #Z1
         self.requestPriorityPenalty = 0 #Z2
         self.inventoryPriorityPenalty = 0 #Z3
@@ -37,6 +39,8 @@ class Solution:
         self.ns = 10 #swaps
 
     def getCost(self):
+        if self.updateCost:
+            self.calculateCost()
         return self.cost
 
     def getListTimeSlot(self):
@@ -44,6 +48,7 @@ class Solution:
 
     def addToListTimeSlot(self, timeSlot):
         self.listTimeSlot.append(timeSlot)
+        self.updateCost = True
 
     def removeFromListTimeSlot(self, timeSlotToRemove):
         i = 0
@@ -52,6 +57,7 @@ class Solution:
                 break
             i += 1
         self.listTimeSlot.pop(i)
+        self.updateCost = True
 
     def copy(self, solutionToCopy):
         #Copie des variables
@@ -69,6 +75,7 @@ class Solution:
             timeSlot.copy(timeSlotToCopy)
 
             self.listTimeSlot.append(timeSlot)
+        self.updateCost = True
 
     def calculateCost(self):
         self.cost = 0
@@ -78,7 +85,6 @@ class Solution:
         self.inventoryPriorityPenalty = 0
 
         for indiceTimeSlot in range(len(self.listTimeSlot)):
-
             timeSlot = self.listTimeSlot[indiceTimeSlot]
 
             #Calcul de Z1
@@ -90,7 +96,6 @@ class Solution:
 
             for indiceRoute in range(len(timeSlot.listRoute)):
                 route = timeSlot.listRoute[indiceRoute]
-
                 if(len(route.getTrajet()) > 1):
                     for indiceClient in range(len(route.getTrajet()) - 1):
                         clientArrivee = route.getClientFromIndice(indiceClient + 1)
@@ -108,129 +113,24 @@ class Solution:
 
         #Calcul du coût total
         self.cost = Solution.facteurZ1 * self.duration + Solution.facteurZ2 * self.requestPriorityPenalty
-        self.cost += Solution.facteurZ3 * self.inventoryPriorityPenalty + Solution.facteurZ4 * Z4
+        + Solution.facteurZ3 * self.inventoryPriorityPenalty + Solution.facteurZ4 * Z4
 
+    def checkSolution(self, showLog=False, notSommetVisited=False):
+        return check(self, showLog, notSommetVisited)
 
-
-    def checkSolution(self, showLog = False, notSommetVisited = False):
-        #Calcul du coût de la solution
-        self.calculateCost()
-
-        #Méthode permettant de vérifier que l'on satisfait toutes les contraintes du problème
-        '''Contrainte du nombre de time slot utilisés'''
-        if(len(self.listTimeSlot) > self.instance.numberTimeSlotMax):
-            if(showLog):
-                print("Solution incompatible - Nombre de time slots")
-                return False
-
-        durationTimeSlot = 0
-        for timeSlot in self.listTimeSlot:
-            #Si le time slot ne contient pas de routes
-            if(len(timeSlot.listRoute) == 0):
-                #Alors on peut le supprimer
-                self.removeFromListTimeSlot(timeSlot)
-                #On relance un check de la solution
-                self.checkSolution()
-
-            #Calcul de la durée du time slot
-            durationTimeSlot = timeSlot.getDuration(
-                    self.instance.timeTravel,
-                    self.instance.fixedCollectionTime,
-                    self.instance.collectionTimePerCrate
-                )
-
-            '''Contrainte du nombre de routes par time slot'''
-            if(len(timeSlot.listRoute) > self.instance.routePerTimeSlotMax):
-                if(showLog):
-                    print("Solution incompatible - Nombre de routes par time slot")
-                return False
-
-            for route in timeSlot.getListRoute():
-                #Si la route courante n'a que 2 clients alors elle ne passe par aucun sommet
-                #Elle fait 0 => 0
-                if(len(route.trajet) == 2):
-                    #On peut donc la supprimer
-                    timeSlot.removeFromListRoute(route)
-                    #On relance le check de la solution
-                    self.checkSolution()
-
-                '''Contrainte de capacité du véhicule'''
-                if(route.getTotalFillingRate() > self.instance.vehiculeCapacityMax):
-                    #print(route.getTotalFillingRate())
-                    #print(self.instance.vehiculeCapacityMax)
-                    if(showLog):
-                        print("Solution incompatible - Capacité max du véhicule")
-                    return False
-
-                '''Contrainte de démarrer du dépôt'''
-                if(route.getTrajet()[0].getIndice() != 0):
-                    if(showLog):
-                        print("Solution incompatible - Début d'une route sans dépôt")
-                    return False
-
-                '''Contrainte de finir par le dépôt'''
-                if(route.getTrajet()[len(route.getTrajet()) - 1].getIndice() != 0):
-                    if(showLog):
-                        print("Solution incompatible - Fin d'une route sans dépôt")
-                    return False
-
-                #Sauf si on spécifie de ne pas vérifier les sommets visités
-                #Utiliser dans les opérateurs de réparation
-                if(not notSommetVisited):
-                    #Validation du passage par le sommet
-                    if (len(route.getTrajet()) > 1):
-                        for i in range(0, len(route.getTrajet()) - 1):
-                            clientDepart = route.getClientFromIndice(i)
-                            clientArrivee = route.getClientFromIndice(i+1)
-
-                            #Mise à jour pour assurer que les sommets sont visités
-                            clientDepart.setVisited()
-                            clientArrivee.setVisited()
-
-            '''Contrainte de durée du time slot'''
-            if (durationTimeSlot > self.instance.durationTimeSlotMax):
-
-                if(showLog):
-                    #print(str(durationTimeSlot ))
-                    #print(self.instance.durationTimeSlotMax)
-                    print("Solution incompatible - Durée du time slot " + str(timeSlot.getIndice()) + " dépassée")
-                return False
-
-        #Si on spécifie de ne pas vérifier les sommets visités
-        #Utilisé dans les opérateurs de réparation
-        if (not notSommetVisited):
-            '''Contrainte de visite de tous les sommets'''
-            for client in self.instance.listClient:
-                if (not client.isVisited()):
-                    if(showLog):
-                        print("Solution incompatible - Client " + str(client.getIndice()) + " non visité ")
-
-                    #○Réinitialisation complète de la liste avant de return False
-                    for clientVisited in self.instance.listClient:
-                        clientVisited.setnotVisited()
-
-                    return False
-                else:
-                    #S'il a bien été visité on le réinitialise
-                    client.setnotVisited()
-
-        return True
-
-    def toString(self, showDetailedCost = True):
-        res = "*** Solution " + self.instance.getName() + " ***\n"
-        res += "- Coût de la solution = " + str(round(self.cost,2)) + "\n"
-
-        if(showDetailedCost):
-            res += "- Z1 = " + str(round(self.duration, 2)) + "\n"
-            res += "- Z2 = " + str(round(self.requestPriorityPenalty, 2)) + "\n"
-            res += "- Z3 = " + str(self.inventoryPriorityPenalty) + "\n"
-            res += "- Z4 = " + str(len(self.listTimeSlot)) + "\n"
-
+    def display(self):
+        print("*** Solution {name} ***".format(name=self.instance.getName()))
+        print("- Coût de la solution = {c} (= {k1}*{z1} + {k2}*{z2} + {k3}*{z3} + {k4}*{z4})".format(c=round(self.cost,2),
+                                                                                                    k1=Solution.facteurZ1,
+                                                                                                    z1=round(self.duration, 2),
+                                                                                                    k2=Solution.facteurZ2,
+                                                                                                    z2=round(self.requestPriorityPenalty, 2),
+                                                                                                    k3=Solution.facteurZ3,
+                                                                                                    z3=self.inventoryPriorityPenalty,
+                                                                                                    k4=Solution.facteurZ4,
+                                                                                                    z4=len(self.listTimeSlot)
+                                                                                                    ))
         i = 1
         for timeSlot in self.listTimeSlot:
-            res += timeSlot.toString(i)
+            timeSlot.display(i)
             i += 1
-        return res
-
-    def display(self, showDetailedCost=False):
-        print(self.toString(showDetailedCost))

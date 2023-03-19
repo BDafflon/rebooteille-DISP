@@ -76,15 +76,13 @@ class Route:
         for clientToCopy in routeToCopy.trajet:
             self.appendClient(clientToCopy)
 
-    def toString(self, positionInListTimeSlot=""):
-        res = "\tRoute " + str(positionInListTimeSlot) + " :" + "\n"
-        res += "\t\t- TotalFillingRate = " + str(self.totalFillingRate) + "\n"
-        res += "\t\t- Duration = " + str(round(self.duration, 2)) + "\n"
-        res += "\t\t- Trajet : "
-        i = 0
-        for client in self.trajet:
-            res += str(client.getIndice())
-            if (i < len(self.trajet) - 1):
-                res += " -> "
-            i = i + 1
-        return res
+    def display(self, positionInListTimeSlot=""):
+        print("\tRoute {i} :".format(i=positionInListTimeSlot))
+        print("\t\t- TotalFillingRate = {r}".format(r=self.totalFillingRate))
+        print("\t\t- Duration = {d}".format(d=round(self.duration, 2)))
+        if(len(self.trajet) == 0):
+            return
+        route = "{i}".format(i=self.trajet[0].getIndice())
+        for client in self.trajet[1:]:
+            route += " -> {i}".format(i=client.getIndice())
+        print("\t\t- Trajet : {route}".format(route=route))

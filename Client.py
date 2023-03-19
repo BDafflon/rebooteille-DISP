@@ -43,13 +43,9 @@ class Client:
     def setnotVisited(self):
         self.visited = False
 
-    def toString(self):
-        result = "\t- Client = " + str(self.indice) + "\n"
-        result += "\t\tCapacity = " + str(self.capacity) + "\n"
-        result += "\t\tFilling rate = " + str(self.fillingRate) + "\n"
-        result += "\t\tRequested = " + str(self.request) + "\n"
-        result += "\t\tVisited = " + str(self.visited)
-        return result
-
     def display(self):
-        print(self.toString())
+        print("- Client = {c}".format(c=self.indice))
+        print("\tCapacity = {c}".format(c=self.capacity))
+        print("\tFilling rate = {f}".format(f=self.fillingRate))
+        print("\tRequested = {r}".format(r=self.request))
+        print("\tVisited = {v}".format(v=self.visited))
