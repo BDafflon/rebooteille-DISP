@@ -1,5 +1,5 @@
 """
-Code from project ALNS 2022, ALEXI OMAR DJAMA
+Source from project ALNS 2022, ALEXI OMAR DJAMA
 """
 from Instance import Instance
 from TimeSlot import TimeSlot
@@ -40,7 +40,7 @@ class Solution:
 
     def getCost(self):
         if self.updateCost:
-            self.calculateCost()
+            return self.calculateCost()
         return self.cost
 
     def getListTimeSlot(self):
@@ -62,20 +62,17 @@ class Solution:
     def copy(self, solutionToCopy):
         #Copie des variables
         self.instance = solutionToCopy.instance
-        self.cost = solutionToCopy.cost
         self.duration = solutionToCopy.duration
         self.requestPriorityPenalty = solutionToCopy.requestPriorityPenalty
         self.inventoryPriorityPenalty = solutionToCopy.inventoryPriorityPenalty
 
         #Copie des timeslots
         self.listTimeSlot = []
-
         for timeSlotToCopy in solutionToCopy.listTimeSlot:
             timeSlot = TimeSlot()
             timeSlot.copy(timeSlotToCopy)
-
             self.listTimeSlot.append(timeSlot)
-        self.updateCost = True
+        self.cost = self.calculateCost()
 
     def calculateCost(self):
         self.cost = 0
@@ -85,6 +82,7 @@ class Solution:
         self.inventoryPriorityPenalty = 0
 
         for indiceTimeSlot in range(len(self.listTimeSlot)):
+
             timeSlot = self.listTimeSlot[indiceTimeSlot]
 
             #Calcul de Z1
@@ -96,6 +94,7 @@ class Solution:
 
             for indiceRoute in range(len(timeSlot.listRoute)):
                 route = timeSlot.listRoute[indiceRoute]
+
                 if(len(route.getTrajet()) > 1):
                     for indiceClient in range(len(route.getTrajet()) - 1):
                         clientArrivee = route.getClientFromIndice(indiceClient + 1)
@@ -113,7 +112,10 @@ class Solution:
 
         #Calcul du coût total
         self.cost = Solution.facteurZ1 * self.duration + Solution.facteurZ2 * self.requestPriorityPenalty
-        + Solution.facteurZ3 * self.inventoryPriorityPenalty + Solution.facteurZ4 * Z4
+        self.cost += Solution.facteurZ3 * self.inventoryPriorityPenalty + Solution.facteurZ4 * Z4
+        self.updateCost = False
+        return self.cost
+
 
     def checkSolution(self, showLog=False, notSommetVisited=False):
         return check(self, showLog, notSommetVisited)

@@ -8,8 +8,8 @@ class TimeSlot:
 
     def __init__(self):
         self.listRoute = []
-        self.indice = TimeSlot.INDICE
         self.duration = 0
+        self.indice = TimeSlot.INDICE
         TimeSlot.INDICE += 1
 
     def getIndice(self):
@@ -30,10 +30,10 @@ class TimeSlot:
         self.listRoute.pop(i)
 
     def getDuration(self, timeTravel, fixedCollectionTime, collectionTimePerCrate):
-        timeSlotDuration = 0
+        sum = 0
         for route in self.listRoute:
-            timeSlotDuration += route.getDuration(timeTravel, fixedCollectionTime, collectionTimePerCrate)
-        self.duration = timeSlotDuration
+            sum += route.getDuration(timeTravel, fixedCollectionTime, collectionTimePerCrate)
+        self.duration = sum
         return self.duration
 
     def copy(self, timeSlotToCopy):
