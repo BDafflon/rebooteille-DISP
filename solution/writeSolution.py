@@ -1,6 +1,6 @@
 import json
 import os.path
-from Solution import Solution
+from solution.Solution import Solution
 
 def toJson(solution, solutionPath="./result/", fileName=None):
     dictResult = {

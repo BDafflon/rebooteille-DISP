@@ -1,17 +1,17 @@
 """
 Source from project ALNS 2022, ALEXI OMAR DJAMA
 """
-from Instance import Instance
-from Route import Route
-from TimeSlot import TimeSlot
-from Solution import Solution
-from datetime import datetime
-from Client import Client
-import methods
-import destroyMethods
-import repairsMethods
+from instance.Instance import Instance
+from instance.TimeSlot import TimeSlot
+from instance.Route import Route
+from instance.Client import Client
+from solution.Solution import Solution
+import alns.methods as methods
+import alns.destroyMethods as destroyMethods
+import alns.repairsMethods as repairsMethods
 
 import time
+from datetime import datetime
 import random
 import pandas as pd
 import copy
@@ -233,7 +233,11 @@ class ALNS :
             return True
         else :
             r = random.random()
-            p = math.exp( - ( delta /  (T0 * ( alpha ** step )) ) )
+            cst = T0 * ( alpha ** step )
+            if cst != 0:
+                p = math.exp( - ( delta / cst) )
+            else:
+                p = 1.1
             #print(delta,T0,alpha,step)
             if r < p :
                 self.onremontelapente+=1
@@ -282,7 +286,7 @@ class ALNS :
             repairsMethods.repair_random_best_insertion(solution,keptinmemory, self.instance, self.repairdontwork)
 
 
-    def solve(self, PU, rho, sigma1, sigma2, sigma3, tolerance, C, alpha, beta, gamma, Nc, theta, Ns, showLog=False):
+    def solve(self, PU, rho, sigma1, sigma2, sigma3, tolerance, C, alpha, beta, gamma, Nc, theta=0.5, Ns=10, showLog=False):
         """
         FR:
         Fonction principale. Les différentes parties sont representées dans le logigramme ou le pseudo code du rapport. Cette fonction a en argument tous les paramètres de l'algorithme et retourne la meilleure solution.

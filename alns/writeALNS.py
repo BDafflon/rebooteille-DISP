@@ -1,6 +1,6 @@
 import os.path
 import pandas as pd
-from ALNS import ALNS
+from alns.ALNS import ALNS
 
 def toCsv(alns, outputPath="./result/", outputName=None, reset=False):
     if outputName == None:

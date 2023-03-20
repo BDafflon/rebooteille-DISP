@@ -1,6 +1,6 @@
 import pandas as pd
-from Instance import Instance
-from Client import Client
+from instance.Instance import Instance
+from instance.Client import Client
 
 def parsingDistance(filePath, sheetName):
     #Méthode pour parser les distances du fichier Time Travel

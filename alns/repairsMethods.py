@@ -3,10 +3,10 @@ Source from project ALNS 2022, ALEXI OMAR DJAMA
 """
 import random
 import time
-import methods
-from Route import Route
-from TimeSlot import TimeSlot
-from Solution import Solution
+import alns.methods as methods
+from instance.Route import Route
+from instance.TimeSlot import TimeSlot
+from solution.Solution import Solution
 
 def repair_randomV2(solution, keptinmemory, instance, repairdontwork):
     """

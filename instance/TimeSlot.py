@@ -1,7 +1,7 @@
 """
 Source from project ALNS 2022, ALEXI OMAR DJAMA
 """
-from Route import Route
+from instance.Route import Route
 
 class TimeSlot:
     INDICE = 1
