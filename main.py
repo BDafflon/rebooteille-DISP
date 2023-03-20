@@ -17,7 +17,7 @@ if __name__ == "__main__":
     print(solution.getCost())
     print("Time = {time}".format(time=alns.evolution_time_best[-1]))
     print(solution.time)
-    writeSolution.toJson(solution)
+    #writeSolution.toJson(solution)
     #writeSolution.toCsv(solution, reset=True)
     #writeALNS.toCsv(alns, reset=True)
     #writeALNS.toXlsx(alns, reset=True)
