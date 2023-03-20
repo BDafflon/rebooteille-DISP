@@ -6,10 +6,10 @@ class Route:
     INDICE = 1
 
     def __init__(self):
-        self.indice = Route.INDICE
         self.trajet = []
         self.totalFillingRate = 0
         self.duration = 0
+        self.indice = Route.INDICE
         Route.INDICE += 1
 
     def getIndice(self):
@@ -18,8 +18,11 @@ class Route:
     def getTrajet(self):
         return self.trajet
 
-    def getTotalFillingRate(self):
-        return self.totalFillingRate
+    def getClientFromIndice(self, indice):
+        return self.trajet[indice]
+
+    def getIdClientByIndice(self, indice):
+        return self.trajet[indice].getIndice()
 
     def appendClient(self, client):
         self.trajet.append(client)
@@ -38,15 +41,15 @@ class Route:
         client = self.trajet.pop(i)
         self.totalFillingRate -= client.getFillingRate()
 
-    def getIdClientByIndice(self, indice):
-        return self.trajet[indice].getIndice()
-
-    def getClientFromIndice(self, indice):
-        return self.trajet[indice]
+    def getTotalFillingRate(self):
+        sum = 0
+        for client in self.trajet:
+            sum += client.getFillingRate()
+        self.totalFillingRate = sum
+        return self.totalFillingRate
 
     def getDuration(self, timeTravel, fixedCollectionTime, collectionTimePerCrate):
         self.duration = 0
-        self.totalFillingRate = 0
 
         if(len(self.trajet) > 1):
             for i in range(len(self.trajet) -1):
@@ -56,12 +59,6 @@ class Route:
                 self.duration += timeTravel[(clientDepart.getIndice(), clientArrivee.getIndice())]
                 self.duration += fixedCollectionTime
                 self.duration += collectionTimePerCrate * clientArrivee.getFillingRate()
-
-                self.totalFillingRate += clientArrivee.getFillingRate()
-
-            #self.duration += timeTravel[(clientArrivee.getIndice(), self.trajet[0].getIndice())]
-            #self.duration += fixedCollectionTime
-            #self.duration += collectionTimePerCrate * clientArrivee.getFillingRate()
 
         return self.duration
 
