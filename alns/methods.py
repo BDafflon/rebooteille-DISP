@@ -45,7 +45,7 @@ def order_ListClient_by_ratio(listClient):
                 isDepotToAdd = True
 
             #Calcul du ratio filling rate / capacity pour tous les clients
-            ratio = {client : client.getFillingRate() / client.getCapacity() for client in listClient}
+            ratio = {client : client.getQuantity() / client.getCapacity() for client in listClient}
             listClient=[]
             for k, v in sorted(ratio.items(), key=lambda x: x[1],reverse=True):
                 listClient.append(k)
@@ -208,6 +208,9 @@ def choose_destroy_method(destroy_methods, Weights_destroy):
     Function choosing a destruction method according to the associated probabilities
     """
     s = sum(Weights_destroy.values())
+    if s <= 1:
+        s = 1
+        #print("s : {s}".format(s=s))
     PROBAS = [Weights_destroy[i]/s for i in Weights_destroy]
     destroy = random.choices(destroy_methods,PROBAS)
     return destroy[0]

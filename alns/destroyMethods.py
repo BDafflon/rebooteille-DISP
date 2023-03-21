@@ -83,7 +83,7 @@ def destroy_Client_with_a_request_placed_at_the_end_of_the_solution(solution, de
                 indiceClient = 0
                 for client in route.trajet:
                     if (client.getIsRequested()):
-                        route.totalFillingRate -= route.trajet[indiceClient].getFillingRate()
+                        route.totalQuantity -= route.trajet[indiceClient].getQuantity()
                         route.trajet.pop(indiceClient)
                         nbClientDestroyed += 1
                         if(nbClientDestroyed >= numberOfClientToDestroy):
@@ -124,7 +124,7 @@ def destroy_Client_with_a_high_ratio_placed_at_the_end_of_the_solution(solution,
                     client = route.trajet[indiceClient]
 
                     #Calcul du ratio fillingRate / capacity
-                    ratio = client.getFillingRate() / client.getCapacity()
+                    ratio = client.getQuantity() / client.getCapacity()
 
                     #Si le client est requested alors on ajoute 1
                     if(client.getIsRequested()):
@@ -133,7 +133,7 @@ def destroy_Client_with_a_high_ratio_placed_at_the_end_of_the_solution(solution,
                     #Si le ratio est supérieure à la borne max, alors on supprime le client
                     if(ratio >= ratioMax):
                         #Suppression du client
-                        route.totalFillingRate -= route.trajet[indiceClient].getFillingRate()
+                        route.totalQuantity -= route.trajet[indiceClient].getQuantity()
                         route.trajet.pop(indiceClient)
 
                         #Update des variables de boucles
@@ -188,12 +188,12 @@ def destroy_worst_clients(solution,degres_destruction):
                         indice_worst_route = route
                         indice_worst_client = indiceClient
                     solution.listTimeSlot[timeSlot].listRoute[route].trajet.insert(indiceClient, client)
-        value = solution.listTimeSlot[indice_worst_timeslot].listRoute[indice_worst_route].trajet[indice_worst_client].getFillingRate()
-        solution.listTimeSlot[indice_worst_timeslot].listRoute[indice_worst_route].totalFillingRate -= value
+        value = solution.listTimeSlot[indice_worst_timeslot].listRoute[indice_worst_route].trajet[indice_worst_client].getQuantity()
+        solution.listTimeSlot[indice_worst_timeslot].listRoute[indice_worst_route].totalQuantity -= value
         solution.listTimeSlot[indice_worst_timeslot].listRoute[indice_worst_route].trajet.pop(indice_worst_client)
         nbIteration += 1
 
-def destroy_related_client_by_distance(solution, degres_destruction, timeTravel) :
+def destroy_related_client_by_distance(solution, degres_destruction) :
     """
     Named 'related removal' in the report but with alpha = 1, beta = 0, gamma = 0.
 
@@ -221,7 +221,7 @@ def destroy_related_client_by_distance(solution, degres_destruction, timeTravel)
     if(len(route.trajet) >= 3):
         #Destruction du client
         position = random.randint(1, len(route.trajet) - 2)
-        route.totalFillingRate -= route.trajet[position].getFillingRate()
+        route.totalQuantity -= route.trajet[position].getQuantity()
         first_client = route.trajet.pop(position)
 
     removed_clients =  [first_client.indice]
@@ -238,20 +238,20 @@ def destroy_related_client_by_distance(solution, degres_destruction, timeTravel)
         temps_min = 100
         for i in liste : # taille de la matrice des distances
             if i not in removed_clients :
-                if timeTravel[(choosed_client,i)] < temps_min :
-                    temps_min = timeTravel[(choosed_client,i)]
+                if solution.instance.getDistance(choosed_client,i) < temps_min :
+                    temps_min = solution.instance.getDistance(choosed_client,i)
                     client_plus_proche = i
         removed_clients.append(client_plus_proche)
         for T in solution.listTimeSlot  :
             for R in T.listRoute :
                 for C in R.trajet :
                     if C.indice == client_plus_proche :
-                        R.totalFillingRate -= C.getFillingRate()
+                        R.totalQuantity -= C.getQuantity()
                         R.trajet.remove(C)
         nbIteration +=1
 
 
-def destroy_related_clients(solution,degres_destruction,alpha,beta,gamma, timeTravel) :
+def destroy_related_clients(solution,degres_destruction,alpha,beta,gamma) :
     """
     Named 'related removal' in the report but with alpha < 1, beta != 0, gamma != 0.
 
@@ -277,7 +277,7 @@ def destroy_related_clients(solution,degres_destruction,alpha,beta,gamma, timeTr
     if(len(route.trajet) >= 3):
         #Destruction du client
         position = random.randint(1, len(route.trajet) - 2)
-        route.totalFillingRate -= route.trajet[position].getFillingRate()
+        route.totalQuantity -= route.trajet[position].getQuantity()
         first_client = route.trajet.pop(position)
 
     removed_clients =  [first_client]
@@ -293,7 +293,7 @@ def destroy_related_clients(solution,degres_destruction,alpha,beta,gamma, timeTr
         Related_min = 200
         for i in liste : # taille de la matrice des distances
             if i not in removed_clients :
-                Related = alpha * timeTravel[(choosed_client.indice,i.indice)] + beta * abs(int(choosed_client.request) - int(i.request)) + gamma* abs((choosed_client.getFillingRate() / choosed_client.getCapacity()) - ( i.getFillingRate() /i.getCapacity()))
+                Related = alpha * solution.instance.getDistance(choosed_client.indice,i.indice) + beta * abs(int(choosed_client.request) - int(i.request)) + gamma* abs((choosed_client.getQuantity() / choosed_client.getCapacity()) - ( i.getQuantity() /i.getCapacity()))
                 if Related < Related_min :
                     Related_min = Related
                     client_plus_proche = i
@@ -303,7 +303,7 @@ def destroy_related_clients(solution,degres_destruction,alpha,beta,gamma, timeTr
             for R in T.listRoute :
                 for C in R.trajet :
                     if C.indice == client_plus_proche.indice :
-                        R.totalFillingRate -= C.getFillingRate()
+                        R.totalQuantity -= C.getQuantity()
                         R.trajet.remove(C)
         nbIteration +=1
 
@@ -324,5 +324,5 @@ def destroy_route(solution, depot):
     route.trajet = []
     route.appendClient(depot)
     route.appendClient(depot)
-    route.totalFillingRate = 0
+    route.totalQuantity = 0
     route.duration = 0

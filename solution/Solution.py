@@ -13,7 +13,7 @@ class Solution:
     facteurZ3 = 10
     facteurZ4 = 1
 
-    def __init__(self, instance=None):
+    def __init__(self, instance=None, time=0):
         self.instance = instance
         self.listTimeSlot = []
         self.cost = 0
@@ -22,7 +22,7 @@ class Solution:
         self.requestPriorityPenalty = 0 #Z2
         self.inventoryPriorityPenalty = 0 #Z3
         #Z4 = len(self.listTimeSlot)
-        self.time = 0
+        self.time = time
         self.nIter = 6000
         self.pu = 100
         self.rho = 0.3
@@ -37,6 +37,9 @@ class Solution:
         self.nc = 2000
         self.theta = 0.5 #swaps
         self.ns = 10 #swaps
+
+    def setTime(self, time):
+        self.time = time
 
     def getCost(self):
         if self.updateCost:
@@ -62,9 +65,7 @@ class Solution:
     def copy(self, solutionToCopy):
         #Copie des variables
         self.instance = solutionToCopy.instance
-        self.duration = solutionToCopy.duration
-        self.requestPriorityPenalty = solutionToCopy.requestPriorityPenalty
-        self.inventoryPriorityPenalty = solutionToCopy.inventoryPriorityPenalty
+        self.time = solutionToCopy.time
 
         #Copie des timeslots
         self.listTimeSlot = []
@@ -73,6 +74,7 @@ class Solution:
             timeSlot.copy(timeSlotToCopy)
             self.listTimeSlot.append(timeSlot)
         self.cost = self.calculateCost()
+        updateCost = False
 
     def calculateCost(self):
         self.cost = 0
@@ -86,11 +88,7 @@ class Solution:
             timeSlot = self.listTimeSlot[indiceTimeSlot]
 
             #Calcul de Z1
-            self.duration += timeSlot.getDuration(
-                self.instance.timeTravel,
-                self.instance.fixedCollectionTime,
-                self.instance.collectionTimePerCrate
-                )
+            self.duration += timeSlot.getDuration(self.instance.getDistance)
 
             for indiceRoute in range(len(timeSlot.listRoute)):
                 route = timeSlot.listRoute[indiceRoute]
@@ -101,7 +99,7 @@ class Solution:
 
                         #Calcul de Z2
                         if(indiceTimeSlot + 1 > 1):
-                            self.requestPriorityPenalty += (math.floor(10*(clientArrivee.getFillingRate() / clientArrivee.getCapacity())) * indiceTimeSlot)/10
+                            self.requestPriorityPenalty += (math.floor(10*(clientArrivee.getQuantity() / clientArrivee.getCapacity())) * indiceTimeSlot)/10
 
                             #Calcul de Z3
                             if(clientArrivee.getIsRequested()):

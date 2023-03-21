@@ -3,9 +3,10 @@ Source from project ALNS 2022, ALEXI OMAR DJAMA
 """
 
 class Client:
-    def __init__(self, indice=0, fillingRate=0, capacity=0, request=0):
+    def __init__(self, indice=0, quantity=0, capacity=0, request=0, location=(0,0)):
         self.indice = indice
-        self.fillingRate = fillingRate
+        self.location = location
+        self.quantity = quantity
         self.capacity = capacity
         self.request = request
         self.visited = False
@@ -13,8 +14,8 @@ class Client:
     def getIndice(self):
         return self.indice
 
-    def getFillingRate(self):
-        return self.fillingRate
+    def getQuantity(self):
+        return self.quantity
 
     def getCapacity(self):
         return self.capacity
@@ -24,15 +25,6 @@ class Client:
 
     def isVisited(self):
         return self.visited
-
-    def setIndice(self, indice):
-        self.indice = indice
-
-    def setFillingRate(self, fillingRate):
-        self.fillingRate = fillingRate
-
-    def setCapacity(self, capacity):
-        self.capacity = capacity
 
     def setRequest(self, requested):
         self.request = requested
@@ -46,6 +38,6 @@ class Client:
     def display(self):
         print("- Client = {c}".format(c=self.indice))
         print("\tCapacity = {c}".format(c=self.capacity))
-        print("\tFilling rate = {f}".format(f=self.fillingRate))
+        print("\tQuantity = {q}".format(q=self.quantity))
         print("\tRequested = {r}".format(r=self.request))
         print("\tVisited = {v}".format(v=self.visited))

@@ -52,18 +52,18 @@ def repair_randomV2(solution, keptinmemory, instance, repairdontwork):
                 newTimeSlot = TimeSlot()
 
                 #Création de la nouvelle route
-                newRoute = Route()
+                newRoute = Route(instance.listVehicle[0])
 
                 #La route fait donc 0 => clientMissing => 0
                 newRoute.appendClient(instance.listClient[0])
                 newRoute.appendClient(clientMissing)
                 newRoute.appendClient(instance.listClient[0])
 
-                newRoute.duration = newRoute.getDuration(instance.timeTravel,instance.fixedCollectionTime,instance.collectionTimePerCrate)
+                newRoute.duration = newRoute.getDuration(instance.getDistance)
 
                 #Ajout de la route au time slot
                 newTimeSlot.addToListRoute(newRoute)
-                newTimeSlot.duration=newTimeSlot.getDuration(instance.timeTravel,instance.fixedCollectionTime,instance.collectionTimePerCrate)
+                newTimeSlot.duration=newTimeSlot.getDuration(instance.getDistance)
 
                 #Ajout du time slot à la solution
                 solution.addToListTimeSlot(newTimeSlot)
@@ -71,7 +71,7 @@ def repair_randomV2(solution, keptinmemory, instance, repairdontwork):
                 break
 
             else :
-                if len(solution.listTimeSlot) + 1 > solution.instance.numberTimeSlotMax :
+                if len(solution.listTimeSlot) + 1 > instance.numberTimeSlotMax :
                     timeSlot = solution.listTimeSlot[random.randint(0, len(solution.listTimeSlot) - 1)]
                 else :
                     solution.listTimeSlot+=["new"]
@@ -80,16 +80,16 @@ def repair_randomV2(solution, keptinmemory, instance, repairdontwork):
                 if timeSlot == "new" :
                     newTimeSlot = TimeSlot()
                     #Création de la nouvelle route
-                    newRoute = Route()
+                    newRoute = Route(instance.listVehicle[0])
                     #La route fait donc 0 => clientMissing => 0
                     newRoute.appendClient(instance.listClient[0])
                     newRoute.appendClient(clientMissing)
                     newRoute.appendClient(instance.listClient[0])
-                    newRoute.duration = newRoute.getDuration(instance.timeTravel,instance.fixedCollectionTime,instance.collectionTimePerCrate)
+                    newRoute.duration = newRoute.getDuration(instance.getDistance)
 
                     #Ajout de la route au time slot
                     newTimeSlot.addToListRoute(newRoute)
-                    newTimeSlot.duration=newTimeSlot.getDuration(instance.timeTravel,instance.fixedCollectionTime,instance.collectionTimePerCrate)
+                    newTimeSlot.duration=newTimeSlot.getDuration(instance.getDistance)
 
                     #Ajout du time slot à la solution
                     solution.addToListTimeSlot(newTimeSlot)
@@ -104,16 +104,16 @@ def repair_randomV2(solution, keptinmemory, instance, repairdontwork):
                     for i in timeSlot.listRoute :
                         if len(i.trajet) <=2 :
                             timeSlot.removeFromListRoute(i)
-                    if len(timeSlot.listRoute) + 1 > solution.instance.routePerTimeSlotMax :
+                    if len(timeSlot.listRoute) + 1 > instance.routePerTimeSlotMax :
                         route = timeSlot.listRoute[random.randint(0, len(timeSlot.listRoute) - 1)]
                         position = random.randint(1, len(route.trajet) - 2)
-                        if(route.getTotalFillingRate() + clientMissing.getFillingRate() < instance.vehiculeCapacityMax):
+                        if(route.getTotalQuantity() + clientMissing.getQuantity() < route.vehicle.getCapacity()):
                             #Ajout du client
                             route.insertClient(position, clientMissing)
 
                             #Si la solution n'est pas compatible on enlève le client
                             if(not solution.checkSolution(False, True)):
-                                route.totalFillingRate -= route.trajet[position].getFillingRate()
+                                route.totalQuantity -= route.trajet[position].getQuantity()
                                 route.trajet.pop(position)
                                 nbIterations += 1
                             else:
@@ -123,14 +123,14 @@ def repair_randomV2(solution, keptinmemory, instance, repairdontwork):
                         route = timeSlot.listRoute[random.randint(0, len(timeSlot.listRoute) - 1)]
                         timeSlot.listRoute.pop(len(timeSlot.listRoute)-1)
                         if route == "new" :
-                            newRoute = Route()
+                            newRoute = Route(instance.listVehicle[0])
 
                             #La route fait donc 0 => ckientMissing => 0
                             newRoute.appendClient(instance.listClient[0])
                             newRoute.appendClient(clientMissing)
                             newRoute.appendClient(instance.listClient[0])
 
-                            newRoute.duration = newRoute.getDuration(instance.timeTravel,instance.fixedCollectionTime,instance.collectionTimePerCrate)
+                            newRoute.duration = newRoute.getDuration(instance.getDistance)
 
                             #Ajout au timeSlot courant
                             timeSlot.addToListRoute(newRoute)
@@ -142,14 +142,14 @@ def repair_randomV2(solution, keptinmemory, instance, repairdontwork):
                                 positionFound = True
                         else :
                             position = random.randint(1, len(route.trajet) - 2)
-                            if(route.getTotalFillingRate() + clientMissing.getFillingRate() < instance.vehiculeCapacityMax):
+                            if(route.getTotalQuantity() + clientMissing.getQuantity() < route.vehicle.getCapacity()):
                                 #Ajout du client
                                 route.insertClient(position, clientMissing)
 
                                 #3 - Vérification de la solution trouvée
                                 #Si la solution n'est pas compatible on enlève le client
                                 if(not solution.checkSolution(False, True)):
-                                    route.totalFillingRate -= route.trajet[position].getFillingRate()
+                                    route.totalQuantity -= route.trajet[position].getQuantity()
                                     route.trajet.pop(position)
                                     nbIterations += 1
                                 else:
@@ -202,7 +202,7 @@ def repair_randomv1(solution, keptinmemory, instance, repairdontwork):
         newTimeSlot = TimeSlot()
 
         #Création de la nouvelle route
-        newRoute = Route()
+        newRoute = Route(instance.listVehicle[0])
 
         #La route fait donc 0 => clientMissing => 0
         newRoute.appendClient(instance.listClient[0])
@@ -230,14 +230,14 @@ def repair_randomv1(solution, keptinmemory, instance, repairdontwork):
             else:
                 timeSlot = solution.listTimeSlot[0]
             if timeSlot.listRoute == [] :
-                newRoute = Route()
+                newRoute = Route(instance.listVehicle[0])
 
                 #La route fait donc 0 => ckientMissing => 0
                 newRoute.appendClient(instance.listClient[0])
                 newRoute.appendClient(clientMissing)
                 newRoute.appendClient(instance.listClient[0])
 
-                newRoute.duration = newRoute.getDuration(instance.timeTravel,instance.fixedCollectionTime,instance.collectionTimePerCrate)
+                newRoute.duration = newRoute.getDuration(instance.getDistance)
 
                 #Ajout au timeSlot courant
                 timeSlot.addToListRoute(newRoute)
@@ -265,14 +265,14 @@ def repair_randomv1(solution, keptinmemory, instance, repairdontwork):
                     position = 1
 
                 #Si la client est ajoutable d'un point de vue capacité
-                if(route.getTotalFillingRate() + clientMissing.getFillingRate() < instance.vehiculeCapacityMax):
+                if(route.getTotalQuantity() + clientMissing.getQuantity() < route.vehicle.getCapacity()):
                     #Ajout du client
                     route.insertClient(position, clientMissing)
 
                     #3 - Vérification de la solution trouvée
                     #Si la solution n'est pas compatible on enlève le client
                     if(not solution.checkSolution(False, True)):
-                        route.totalFillingRate -= route.trajet[position].getFillingRate()
+                        route.totalQuantity -= route.trajet[position].getQuantity()
                         route.trajet.pop(position)
                     else:
                         positionFound = True
@@ -323,7 +323,7 @@ def repair_2_regret(solution, keptinmemory, instance, repairdontwork):
     if solution.listTimeSlot == [] :
         newTimeSlot = TimeSlot()
         #Création de la nouvelle route
-        newRoute = Route()
+        newRoute = Route(instance.listVehicle[0])
 
         #La route fait donc 0 => clientMissing => 0
         newRoute.appendClient(instance.listClient[0])
@@ -353,7 +353,7 @@ def repair_2_regret(solution, keptinmemory, instance, repairdontwork):
                 for route in range(len(solution.listTimeSlot[timeSlot].listRoute)):
                     for indiceClient in range(1, len(solution.listTimeSlot[timeSlot].listRoute[route].trajet)):
                         solution.listTimeSlot[timeSlot].listRoute[route].trajet.insert(indiceClient, Client)
-                        solution.listTimeSlot[timeSlot].listRoute[route].totalFillingRate  +=  solution.listTimeSlot[timeSlot].listRoute[route].trajet[indiceClient].getFillingRate()
+                        solution.listTimeSlot[timeSlot].listRoute[route].totalQuantity  +=  solution.listTimeSlot[timeSlot].listRoute[route].trajet[indiceClient].getQuantity()
                         solution.calculateCost()
                         cost =  solution.cost
                         if cost < min_cost :
@@ -370,7 +370,7 @@ def repair_2_regret(solution, keptinmemory, instance, repairdontwork):
                             indice_best_client = indiceClient
                             best_client = Client
 
-                        solution.listTimeSlot[timeSlot].listRoute[route].totalFillingRate  -=  solution.listTimeSlot[timeSlot].listRoute[route].trajet[indiceClient].getFillingRate()
+                        solution.listTimeSlot[timeSlot].listRoute[route].totalQuantity  -=  solution.listTimeSlot[timeSlot].listRoute[route].trajet[indiceClient].getQuantity()
                         solution.listTimeSlot[timeSlot].listRoute[route].trajet.pop(indiceClient)
                         solution.calculateCost()
 
@@ -385,7 +385,7 @@ def repair_2_regret(solution, keptinmemory, instance, repairdontwork):
                 client_to_insert = Data_best_client[i][1:]
 
         solution.listTimeSlot[client_to_insert[0]].listRoute[client_to_insert[1]].trajet.insert(client_to_insert[2], client_to_insert[3])
-        solution.listTimeSlot[client_to_insert[0]].listRoute[client_to_insert[1]].totalFillingRate += solution.listTimeSlot[client_to_insert[0]].listRoute[client_to_insert[1]].trajet[client_to_insert[2]].getFillingRate()
+        solution.listTimeSlot[client_to_insert[0]].listRoute[client_to_insert[1]].totalQuantity += solution.listTimeSlot[client_to_insert[0]].listRoute[client_to_insert[1]].trajet[client_to_insert[2]].getQuantity()
 
         listClientMissing.remove(client_to_insert[3])
 
@@ -445,11 +445,11 @@ def repair_FirstPositionAvailable_maxratio_listClient(solution, keptinmemory, in
             for timeSlot in solution.listTimeSlot:
                 for route in timeSlot.listRoute:
                     #S'il est possible d'ajouter le clientMissing d'un point de vue de la capacité alors on essaie aux différentes positions
-                    if(clientMissing.getFillingRate() + route.getTotalFillingRate() <= instance.vehiculeCapacityMax):
+                    if(clientMissing.getQuantity() + route.getTotalQuantity() <= route.vehicle.getCapacity()):
                         # si la route est vide :
                         if len(route.trajet) == 2 :
                             route.trajet.insert(1, clientMissing)
-                            route.totalFillingRate += clientMissing.getFillingRate()
+                            route.totalQuantity += clientMissing.getQuantity()
 
                             #Si la solution est compatible alors on sort de la boucle de client
                             if (solution.checkSolution(False,True)):
@@ -457,20 +457,20 @@ def repair_FirstPositionAvailable_maxratio_listClient(solution, keptinmemory, in
                                 break
                             else:
                                 #Sinon on supprime l'ajout
-                                route.totalFillingRate -= clientMissing.getFillingRate()
+                                route.totalQuantity -= clientMissing.getQuantity()
                                 route.trajet.pop(1)
 
                         # si la route a au moins un client
                         for indiceClient in range(1, len(route.trajet) - 1):
                             route.trajet.insert(indiceClient, clientMissing)
-                            route.totalFillingRate += clientMissing.getFillingRate()
+                            route.totalQuantity += clientMissing.getQuantity()
                             #Si la solution est compatible alors on sort de la boucle de client
                             if (solution.checkSolution(False,True)):
                                 positionFound = True
                                 break
                             else:
                                 #Sinon on supprime l'ajout
-                                route.totalFillingRate -= clientMissing.getFillingRate()
+                                route.totalQuantity -= clientMissing.getQuantity()
                                 route.trajet.pop(indiceClient)
                     #Si on a trouvé une position on sort de la boucle de route
                     if(positionFound):
@@ -482,14 +482,14 @@ def repair_FirstPositionAvailable_maxratio_listClient(solution, keptinmemory, in
                     #S'il est possible d'ajouter une route au time slot
                     if(len(timeSlot.listRoute) < instance.routePerTimeSlotMax):
                         #Création de la route
-                        newRoute = Route()
+                        newRoute = Route(instance.listVehicle[0])
 
                         #La route fait donc 0 => ckientMissing => 0
                         newRoute.appendClient(instance.listClient[0])
                         newRoute.appendClient(clientMissing)
                         newRoute.appendClient(instance.listClient[0])
 
-                        newRoute.duration = newRoute.getDuration(instance.timeTravel,instance.fixedCollectionTime,instance.collectionTimePerCrate)
+                        newRoute.duration = newRoute.getDuration(instance.getDistance)
                         #Ajout au timeSlot courant
                         timeSlot.addToListRoute(newRoute)
 
@@ -512,7 +512,7 @@ def repair_FirstPositionAvailable_maxratio_listClient(solution, keptinmemory, in
                         newTimeSlot = TimeSlot()
 
                         #Création de la nouvelle route
-                        newRoute = Route()
+                        newRoute = Route(instance.listVehicle[0])
 
                         #La route fait donc 0 => clientMissing => 0
                         newRoute.appendClient(instance.listClient[0])
@@ -597,11 +597,11 @@ def repair_FirstPositionAvailable_randomlistClient(solution, keptinmemory, insta
             for timeSlot in solution.listTimeSlot:
                 for route in timeSlot.listRoute:
                     #S'il est possible d'ajouter le clientMissing d'un point de vue de la capacité alors on essaie aux différentes positions
-                    if(clientMissing.getFillingRate() + route.getTotalFillingRate() <= instance.vehiculeCapacityMax):
+                    if(clientMissing.getQuantity() + route.getTotalQuantity() <= route.vehicle.getCapacity()):
                         # si la route est vide :
                         if len(route.trajet) == 2 :
                             route.trajet.insert(1, clientMissing)
-                            route.totalFillingRate += clientMissing.getFillingRate()
+                            route.totalQuantity += clientMissing.getQuantity()
 
                             #Si la solution est compatible alors on sort de la boucle de client
                             if (solution.checkSolution(False,True)):
@@ -609,20 +609,20 @@ def repair_FirstPositionAvailable_randomlistClient(solution, keptinmemory, insta
                                 break
                             else:
                                 #Sinon on supprime l'ajout
-                                route.totalFillingRate -= clientMissing.getFillingRate()
+                                route.totalQuantity -= clientMissing.getQuantity()
                                 route.trajet.pop(1)
 
                         # si la route a au moins un client
                         for indiceClient in range(1, len(route.trajet) - 1):
                             route.trajet.insert(indiceClient, clientMissing)
-                            route.totalFillingRate += clientMissing.getFillingRate()
+                            route.totalQuantity += clientMissing.getQuantity()
                             #Si la solution est compatible alors on sort de la boucle de client
                             if (solution.checkSolution(False,True)):
                                 positionFound = True
                                 break
                             else:
                                 #Sinon on supprime l'ajout
-                                route.totalFillingRate -= clientMissing.getFillingRate()
+                                route.totalQuantity -= clientMissing.getQuantity()
                                 route.trajet.pop(indiceClient)
 
                     #Si on a trouvé une position on sort de la boucle de route
@@ -635,14 +635,14 @@ def repair_FirstPositionAvailable_randomlistClient(solution, keptinmemory, insta
                     #S'il est possible d'ajouter une route au time slot
                     if(len(timeSlot.listRoute) < instance.routePerTimeSlotMax):
                         #Création de la route
-                        newRoute = Route()
+                        newRoute = Route(instance.listVehicle[0])
 
                         #La route fait donc 0 => ckientMissing => 0
                         newRoute.appendClient(instance.listClient[0])
                         newRoute.appendClient(clientMissing)
                         newRoute.appendClient(instance.listClient[0])
 
-                        newRoute.duration = newRoute.getDuration(instance.timeTravel,instance.fixedCollectionTime,instance.collectionTimePerCrate)
+                        newRoute.duration = newRoute.getDuration(instance.getDistance)
 
                         #Ajout au timeSlot courant
                         timeSlot.addToListRoute(newRoute)
@@ -666,7 +666,7 @@ def repair_FirstPositionAvailable_randomlistClient(solution, keptinmemory, insta
                         newTimeSlot = TimeSlot()
 
                         #Création de la nouvelle route
-                        newRoute = Route()
+                        newRoute = Route(instance.listVehicle[0])
 
                         #La route fait donc 0 => clientMissing => 0
                         newRoute.appendClient(instance.listClient[0])
@@ -736,7 +736,7 @@ def repair_random_best_insertion(solution, keptinmemory, instance, repairdontwor
         newTimeSlot = TimeSlot()
 
         #Création de la nouvelle route
-        newRoute = Route()
+        newRoute = Route(instance.listVehicle[0])
 
         #La route fait donc 0 => clientMissing => 0
         newRoute.appendClient(instance.listClient[0])
@@ -754,19 +754,19 @@ def repair_random_best_insertion(solution, keptinmemory, instance, repairdontwor
         min_cost = 100000
         indice_best_timeslot, indice_best_route, indice_best_client = 0, 0, 0
 
-        if len(solution.listTimeSlot)+1 <= solution.instance.numberTimeSlotMax :
+        if len(solution.listTimeSlot)+1 <= instance.numberTimeSlotMax :
             newTimeSlot = TimeSlot()
 
             #Ajout du time slot à la solution
             solution.addToListTimeSlot(newTimeSlot)
 
         for timeSlot in range(len(solution.listTimeSlot)):
-            if len(solution.listTimeSlot[timeSlot].listRoute) + 1 <= solution.instance.routePerTimeSlotMax :
-                newRoute = Route()
+            if len(solution.listTimeSlot[timeSlot].listRoute) + 1 <= instance.routePerTimeSlotMax :
+                newRoute = Route(instance.listVehicle[0])
                 newRoute.appendClient(instance.listClient[0])
                 newRoute.appendClient(instance.listClient[0])
 
-                newRoute.duration = newRoute.getDuration(instance.timeTravel,instance.fixedCollectionTime,instance.collectionTimePerCrate)
+                newRoute.duration = newRoute.getDuration(instance.getDistance)
                 #Ajout au timeSlot courant
                 solution.listTimeSlot[timeSlot].addToListRoute(newRoute)
 
@@ -774,7 +774,7 @@ def repair_random_best_insertion(solution, keptinmemory, instance, repairdontwor
                 for indiceClient in range(1, len(solution.listTimeSlot[timeSlot].listRoute[route].trajet)):
 
                     solution.listTimeSlot[timeSlot].listRoute[route].trajet.insert(indiceClient, Client)
-                    solution.listTimeSlot[timeSlot].listRoute[route].totalFillingRate  +=  solution.listTimeSlot[timeSlot].listRoute[route].trajet[indiceClient].getFillingRate()
+                    solution.listTimeSlot[timeSlot].listRoute[route].totalQuantity  +=  solution.listTimeSlot[timeSlot].listRoute[route].trajet[indiceClient].getQuantity()
                     solution.calculateCost()
                     cost =  solution.cost
                     if cost < min_cost :
@@ -783,12 +783,12 @@ def repair_random_best_insertion(solution, keptinmemory, instance, repairdontwor
                         indice_best_route = route
                         indice_best_client = indiceClient
 
-                    solution.listTimeSlot[timeSlot].listRoute[route].totalFillingRate  -=  solution.listTimeSlot[timeSlot].listRoute[route].trajet[indiceClient].getFillingRate()
+                    solution.listTimeSlot[timeSlot].listRoute[route].totalQuantity  -=  solution.listTimeSlot[timeSlot].listRoute[route].trajet[indiceClient].getQuantity()
                     solution.listTimeSlot[timeSlot].listRoute[route].trajet.pop(indiceClient)
                     solution.calculateCost()
 
         solution.listTimeSlot[indice_best_timeslot].listRoute[indice_best_route].trajet.insert(indice_best_client, Client)
-        solution.listTimeSlot[indice_best_timeslot].listRoute[indice_best_route].totalFillingRate += solution.listTimeSlot[indice_best_timeslot].listRoute[indice_best_route].trajet[indice_best_client].getFillingRate()
+        solution.listTimeSlot[indice_best_timeslot].listRoute[indice_best_route].totalQuantity += solution.listTimeSlot[indice_best_timeslot].listRoute[indice_best_route].trajet[indice_best_client].getQuantity()
 
     if not solution.checkSolution(False,True) :
         repairdontwork["repair_random_best_insertion"] +=1
@@ -828,7 +828,7 @@ def repair_max_ratio_best_insertion(solution, keptinmemory, instance, repairdont
         newTimeSlot = TimeSlot()
 
         #Création de la nouvelle route
-        newRoute = Route()
+        newRoute = Route(instance.listVehicle[0])
 
         #La route fait donc 0 => clientMissing => 0
         newRoute.appendClient(instance.listClient[0])
@@ -849,7 +849,7 @@ def repair_max_ratio_best_insertion(solution, keptinmemory, instance, repairdont
             for route in range(len(solution.listTimeSlot[timeSlot].listRoute)):
                 for indiceClient in range(1, len(solution.listTimeSlot[timeSlot].listRoute[route].trajet)):
                     solution.listTimeSlot[timeSlot].listRoute[route].trajet.insert(indiceClient, Client)
-                    solution.listTimeSlot[timeSlot].listRoute[route].totalFillingRate  +=  solution.listTimeSlot[timeSlot].listRoute[route].trajet[indiceClient].getFillingRate()
+                    solution.listTimeSlot[timeSlot].listRoute[route].totalQuantity  +=  solution.listTimeSlot[timeSlot].listRoute[route].trajet[indiceClient].getQuantity()
                     solution.calculateCost()
                     cost =  solution.cost
                     if cost < min_cost :
@@ -858,12 +858,12 @@ def repair_max_ratio_best_insertion(solution, keptinmemory, instance, repairdont
                         indice_best_route = route
                         indice_best_client = indiceClient
 
-                    solution.listTimeSlot[timeSlot].listRoute[route].totalFillingRate  -=  solution.listTimeSlot[timeSlot].listRoute[route].trajet[indiceClient].getFillingRate()
+                    solution.listTimeSlot[timeSlot].listRoute[route].totalQuantity  -=  solution.listTimeSlot[timeSlot].listRoute[route].trajet[indiceClient].getQuantity()
                     solution.listTimeSlot[timeSlot].listRoute[route].trajet.pop(indiceClient)
                     solution.calculateCost()
 
         solution.listTimeSlot[indice_best_timeslot].listRoute[indice_best_route].trajet.insert(indice_best_client, Client)
-        solution.listTimeSlot[indice_best_timeslot].listRoute[indice_best_route].totalFillingRate += solution.listTimeSlot[indice_best_timeslot].listRoute[indice_best_route].trajet[indice_best_client].getFillingRate()
+        solution.listTimeSlot[indice_best_timeslot].listRoute[indice_best_route].totalQuantity += solution.listTimeSlot[indice_best_timeslot].listRoute[indice_best_route].trajet[indice_best_client].getQuantity()
 
     if not solution.checkSolution(False,True) :
         repairdontwork["repair_random_best_insertion"] +=1

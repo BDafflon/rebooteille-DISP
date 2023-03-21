@@ -29,10 +29,10 @@ class TimeSlot:
             i += 1
         self.listRoute.pop(i)
 
-    def getDuration(self, timeTravel, fixedCollectionTime, collectionTimePerCrate):
+    def getDuration(self, timeFunction):
         sum = 0
         for route in self.listRoute:
-            sum += route.getDuration(timeTravel, fixedCollectionTime, collectionTimePerCrate)
+            sum += route.getDuration(timeFunction)
         self.duration = sum
         return self.duration
 
@@ -44,7 +44,7 @@ class TimeSlot:
         #Copie des routes
         self.listRoute = []
         for routeToCopy in timeSlotToCopy.listRoute:
-            route = Route()
+            route = Route(routeToCopy.vehicle)
             route.copy(routeToCopy)
             self.addToListRoute(route)
 

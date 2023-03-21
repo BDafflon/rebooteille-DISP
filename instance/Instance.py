@@ -1,16 +1,17 @@
 """
 Source from project ALNS 2022, ALEXI OMAR DJAMA
 """
+import geopy.distance as gd
 
 class Instance:
-    def __init__(self, listClient, timeTravel, fixedCollectionTime, collectionTimePerCrate, vehiculeVelocityMax, vehiculeCapacityMax, numberTimeSlotMax, routePerTimeSlotMax, durationTimeSlotMax, name="present"):
+    def __init__(self, listClient, listVehicle, numberTimeSlotMax, routePerTimeSlotMax, durationTimeSlotMax, distTravel={}, name="present"):
         self.listClient = listClient
-        self.timeTravel = timeTravel
+        self.listVehicle = listVehicle
+        if len(distTravel) == 0:
+            self.distTravel = {(i.getIndice(), j.getIndice()): gd.geodesic(i.location, j.location).km for i in listClient for j in listClient}
+        else:
+            self.distTravel = distTravel
         self.name = name
-        self.fixedCollectionTime = fixedCollectionTime
-        self.collectionTimePerCrate = collectionTimePerCrate
-        self.vehiculeVelocityMax = vehiculeVelocityMax
-        self.vehiculeCapacityMax = vehiculeCapacityMax
         self.numberTimeSlotMax = numberTimeSlotMax
         self.routePerTimeSlotMax = routePerTimeSlotMax
         self.durationTimeSlotMax = durationTimeSlotMax
@@ -21,26 +22,30 @@ class Instance:
     def getClientByClientId(self, clientId):
         for client in self.listClient:
             if(client.getIndice() == clientId):
+                print("{i} vs {j}".format(i=clientId, j=client.getIndice()))
                 return client
 
-    def display(self, showClients=False, showTimeTravel=False):
+    def getDistance(self, firstClientId, secondClientId):
+        return self.distTravel[(firstClientId, secondClientId)]
+
+    def display(self, showClients=False, showDistTravel=False):
         # showClients est un booleen correspondant à l'affichage la liste des clients
-        # showTimeTravel est un booleen correspondant à l'affichage du temps de trajet
+        # showDistTravel est un booleen correspondant à l'affichage de la distance entre chaque client
         print("--- Instance {name} ---".format(name=self.name))
-        print("Fixed collection time = {fct}".format(fct=self.fixedCollectionTime))
-        print("Collection time per crate = {ctc}".format(ctc=self.collectionTimePerCrate))
-        print("Vehicule velocity max = {vv}".format(vv=self.vehiculeVelocityMax))
-        print("Vehicule capacity max = {vc}".format(vc=self.vehiculeCapacityMax))
         print("Routes per time slot max = {rts}".format(rts=self.routePerTimeSlotMax))
         print("Number time slot max = {nts}".format(nts=self.numberTimeSlotMax))
         print("Duration time slot max = {dts}".format(dts=self.durationTimeSlotMax))
 
         if(showClients):
-            print("* List of client :")
+            print("* List of clients :")
             for client in self.listClient:
                 client.display()
 
-        if(showTimeTravel):
-            print("* Time travel :")
-            for cle, valeur in self.timeTravel.items():
+        print("* List of vehicles :")
+        for vehicle in self.listVehicle:
+            vehicle.display()
+
+        if(showDistTravel):
+            print("* Distance travel :")
+            for cle, valeur in self.distTravel.items():
                 print("\t-{cle} : {valeur}".format(cle=cle, valeur=valeur))

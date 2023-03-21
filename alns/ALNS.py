@@ -110,10 +110,7 @@ class ALNS :
             listClient[0].setVisited()
 
             #Tant que la durée du time slot n'est pas dépassée et que le nombre de routes est inférieur à la limite
-            while(timeSlot.getDuration(
-                    self.instance.timeTravel,
-                    self.instance.fixedCollectionTime,
-                    self.instance.collectionTimePerCrate) <= self.instance.durationTimeSlotMax
+            while(timeSlot.getDuration(self.instance.getDistance) <= self.instance.durationTimeSlotMax
                     and len(timeSlot.listRoute) < self.instance.routePerTimeSlotMax
                     and not noMoreClientForDuration):
 
@@ -125,7 +122,7 @@ class ALNS :
                 noMoreClientForCapacity = False
 
                 #Création de la route
-                route = Route()
+                route = Route(self.instance.listVehicle[0])
                 routeAddedToTimeSlot = False
 
                 #Ajout du dépôt de départ et d'arrivée
@@ -133,7 +130,7 @@ class ALNS :
                 route.appendClient(self.instance.listClient[0])
 
                 #Tant que de la capacité est disponible sur le véhicule
-                while(route.getTotalFillingRate() <= self.instance.vehiculeCapacityMax
+                while(route.getTotalQuantity() <= self.instance.listVehicle[0].getCapacity()
                       and not noMoreClientForCapacity):
 
                     #Variable pour vérifier si une client a été ajoutée sur l'itération de capacité
@@ -152,11 +149,8 @@ class ALNS :
 
                             #Test si l'ajout respecte les contraintes de durée du time slot et de capacité
                             #du véhicule pour cette route
-                            if(timeSlot.getDuration(
-                                    self.instance.timeTravel,
-                                    self.instance.fixedCollectionTime,
-                                    self.instance.collectionTimePerCrate) <= self.instance.durationTimeSlotMax
-                               and route.getTotalFillingRate() <= self.instance.vehiculeCapacityMax):
+                            if(timeSlot.getDuration(self.instance.getDistance) <= self.instance.durationTimeSlotMax
+                               and route.getTotalQuantity() <= self.instance.listVehicle[0].getCapacity()):
 
                                 #Si oui alors on valide l'ajout
                                 client.setVisited()
@@ -260,9 +254,9 @@ class ALNS :
         if destroy_method == "destroy_random" :
             destroyMethods.destroy_random(solution,degres_destruction)
         if destroy_method == "destroy_related_client_by_distance" :
-            destroyMethods.destroy_related_client_by_distance(solution, degres_destruction, self.instance.timeTravel)
+            destroyMethods.destroy_related_client_by_distance(solution, degres_destruction)
         if destroy_method == "destroy_related_clients" :
-            destroyMethods.destroy_related_clients(solution,degres_destruction,alpha,beta,gamma, self.instance.timeTravel)
+            destroyMethods.destroy_related_clients(solution,degres_destruction,alpha,beta,gamma)
         if destroy_method == "destroy_Client_with_a_high_ratio_placed_at_the_end_of_the_solution" :
             destroyMethods.destroy_Client_with_a_high_ratio_placed_at_the_end_of_the_solution(solution, degres_destruction)
         if destroy_method == "destroy_Client_with_a_request_placed_at_the_end_of_the_solution" :
@@ -436,12 +430,12 @@ class ALNS :
                     Success_destroy[destroy_method] += sigma1
                     Success_repair[repair_method] += sigma1
 
-                    self.bestSolution.calculateCost()
 
                     # mise a jour des variables d'informations
-
-                    self.evolution_cost.append(round(self.bestSolution.cost,2)   )
-                    self.evolution_time_best.append(round(time.perf_counter() - initialTime,3))
+                    self.evolution_cost.append(round(self.bestSolution.calculateCost(), 2))
+                    currentTime = round(time.perf_counter() - initialTime, 3)
+                    self.bestSolution.setTime(currentTime)
+                    self.evolution_time_best.append(currentTime)
                     self.USED_METHODS_UNTIL_LAST_BEST = copy.deepcopy(self.USED_METHODS)
                     nbIterationSinceLastBest = 0
                     self.evolution_iter_best.append(nbIteration+1)

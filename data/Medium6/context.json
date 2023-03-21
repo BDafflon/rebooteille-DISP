@@ -1,0 +1,10 @@
+{
+    "name": "Medium6",
+    "depotName": "Entrepot 1",
+    "depotAdress": "25 route de Vaulx, 69150 D\u00e9cines",
+    "depotLatitude": 45.777716,
+    "depotLongitude": 4.950176,
+    "numberTimeSlotMax": 4,
+    "routePerTimeSlotMax": 2,
+    "durationTimeSlotMax": 120
+}

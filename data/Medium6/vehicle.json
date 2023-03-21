@@ -1,0 +1,25 @@
+[
+    {
+        "name": "camion",
+        "speed": 30,
+        "capacity": 110,
+        "cost": 10,
+        "driver": [
+            "Bob"
+        ],
+        "fixedCollectionTime": 4,
+        "collectionTimePerCrate": 0.25
+    },
+    {
+        "name": "bike",
+        "speed": 15,
+        "capacity": 20,
+        "cost": 0,
+        "driver": [
+            "Bob",
+            "Toto"
+        ],
+        "fixedCollectionTime": 2,
+        "collectionTimePerCrate": 0.25
+    }
+]

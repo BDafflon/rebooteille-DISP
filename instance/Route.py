@@ -5,9 +5,10 @@ Source from project ALNS 2022, ALEXI OMAR DJAMA
 class Route:
     INDICE = 1
 
-    def __init__(self):
+    def __init__(self, vehicle):
+        self.vehicle = vehicle
         self.trajet = []
-        self.totalFillingRate = 0
+        self.totalQuantity = 0
         self.duration = 0
         self.indice = Route.INDICE
         Route.INDICE += 1
@@ -26,11 +27,11 @@ class Route:
 
     def appendClient(self, client):
         self.trajet.append(client)
-        self.totalFillingRate += client.getFillingRate()
+        self.totalQuantity += client.getQuantity()
 
     def insertClient(self, indice, client):
         self.trajet.insert(indice, client)
-        self.totalFillingRate += client.getFillingRate()
+        self.totalQuantity += client.getQuantity()
 
     def removeClient(self, clientToRemove):
         i = 0
@@ -39,16 +40,16 @@ class Route:
                 break
             i = i + 1
         client = self.trajet.pop(i)
-        self.totalFillingRate -= client.getFillingRate()
+        self.totalQuantity -= client.getQuantity()
 
-    def getTotalFillingRate(self):
+    def getTotalQuantity(self):
         sum = 0
         for client in self.trajet:
-            sum += client.getFillingRate()
-        self.totalFillingRate = sum
-        return self.totalFillingRate
+            sum += client.getQuantity()
+        self.totalQuantity = sum
+        return self.totalQuantity
 
-    def getDuration(self, timeTravel, fixedCollectionTime, collectionTimePerCrate):
+    def getDuration(self, distFunction):
         self.duration = 0
 
         if(len(self.trajet) > 1):
@@ -56,9 +57,10 @@ class Route:
                 clientDepart = self.trajet[i]
                 clientArrivee = self.trajet[i + 1]
 
-                self.duration += timeTravel[(clientDepart.getIndice(), clientArrivee.getIndice())]
-                self.duration += fixedCollectionTime
-                self.duration += collectionTimePerCrate * clientArrivee.getFillingRate()
+                time = distFunction(clientDepart.getIndice(), clientArrivee.getIndice())/self.vehicle.getSpeed() * 60 #min
+                self.duration += time
+                self.duration += self.vehicle.getFixedCollectionTime()
+                self.duration += self.vehicle.getCollectionTimePerCrate() * clientArrivee.getQuantity()
 
         return self.duration
 
@@ -75,7 +77,7 @@ class Route:
 
     def display(self, positionInListTimeSlot=""):
         print("\tRoute {i} :".format(i=positionInListTimeSlot))
-        print("\t\t- TotalFillingRate = {r}".format(r=self.totalFillingRate))
+        print("\t\t- Total Quantity = {q}".format(q=self.totalQuantity))
         print("\t\t- Duration = {d}".format(d=round(self.duration, 2)))
         if(len(self.trajet) == 0):
             return

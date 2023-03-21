@@ -1,6 +1,7 @@
 import pandas as pd
 from instance.Instance import Instance
 from instance.Client import Client
+from instance.Vehicle import Vehicle
 
 def parsingDistance(filePath, sheetName):
     #Méthode pour parser les distances du fichier Time Travel
@@ -19,7 +20,7 @@ def parsingDistance(filePath, sheetName):
 
     return timeTravel
 
-def parse(fileDataPath, dataSheetName="Data", fileDistPath="./data/MatricesDT.xlsx", distSheetName="Tps30kmh"):
+def parseForALNS(fileDataPath, dataSheetName="Data", fileDistPath="./data/MatricesDT.xlsx", distSheetName="Distance"):
     listClient = []
     timeTravel = parsingDistance(fileDistPath, distSheetName)
 
@@ -37,10 +38,10 @@ def parse(fileDataPath, dataSheetName="Data", fileDistPath="./data/MatricesDT.xl
     for i in range(0,numberClient):
         if(dfInstance[i][1].astype(int) == 1):
             #Creation du client
-            fillingRate = dfInstance[i][3]
+            quantity = dfInstance[i][3]
             capacity = dfInstance[i][2]
             request = (dfInstance[i][12].astype(int) == 1)
-            client = Client(i, fillingRate=fillingRate, capacity=capacity, request=request)
+            client = Client(i, quantity, capacity, request)
             #Ajout du client à la liste de client
             listClient.append(client)
 
@@ -53,4 +54,50 @@ def parse(fileDataPath, dataSheetName="Data", fileDistPath="./data/MatricesDT.xl
     routePerTimeSlotMax = dfInstance[0][9].astype(int)
     durationTimeSlotMax = dfInstance[0][11].astype(int)
 
-    return Instance(listClient, timeTravel, fixedCollectionTime, collectionTimePerCrate, vehiculeVelocityMax, vehiculeCapacityMax, numberTimeSlotMax, routePerTimeSlotMax, durationTimeSlotMax, name)
+    listVehicle = [Vehicle(vehiculeCapacityMax, vehiculeVelocityMax, fixedCollectionTime, collectionTimePerCrate)]
+
+    return Instance(listClient, listVehicle, numberTimeSlotMax, routePerTimeSlotMax, durationTimeSlotMax, timeTravel, name)
+
+def readVehicles(fileName):
+    listVehicle = []
+    dfVehicles = pd.read_json(fileName, orient='records')
+    for i in range(len(dfVehicles)):
+        capacity = dfVehicles['capacity'][i]
+        speed = dfVehicles['speed'][i]
+        fct = dfVehicles['fixedCollectionTime'][i]
+        ctc = dfVehicles['collectionTimePerCrate'][i]
+        cost = dfVehicles['cost'][i]
+        name = dfVehicles['name'][i]
+        drivers = dfVehicles['driver'][i]
+        listVehicle.append(Vehicle(capacity, speed, fct, ctc, cost, name, drivers))
+    return listVehicle
+
+def readClients(fileName):
+    listClient = []
+    dfClient = pd.read_excel(fileName)
+    for i in range(len(dfClient)):
+        id = i + 1
+        quantity = dfClient['Quantité'][i]
+        capacity = dfClient['Nb Casiers'][i]
+        request = dfClient['Requête'][i]
+        location = (dfClient['latitude'][i], dfClient['longitude'][i])
+        listClient.append(Client(id, quantity, capacity, request, location))
+    return listClient
+
+def readContext(fileName):
+    dfContext = pd.read_json(fileName, orient='index').transpose()
+    name = dfContext['name'][0]
+    id = 0
+    location = (dfContext['depotLatitude'][0], dfContext['depotLongitude'][0])
+    depot = Client(indice=id, location=location, capacity=1)
+    ntm = dfContext['numberTimeSlotMax'][0]
+    rpt = dfContext['routePerTimeSlotMax'][0]
+    dtm = dfContext['durationTimeSlotMax'][0]
+    return name, depot, ntm, rpt, dtm
+
+def parse(filePath):
+    listVehicle = readVehicles(filePath+"vehicle.json")
+    listClient = readClients(filePath+"points.xlsx")
+    name, depot, ntm, rpt, dtm = readContext(filePath+"context.json")
+    listClient = [depot] + listClient
+    return Instance(listClient, listVehicle, ntm, rpt, dtm, name=name)

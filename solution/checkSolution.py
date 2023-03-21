@@ -20,11 +20,7 @@ def check(solution, showLog = True, notSommetVisited = False):
             return solution.checkSolution()
 
         #Calcul de la durée du time slot
-        durationTimeSlot = timeSlot.getDuration(
-                solution.instance.timeTravel,
-                solution.instance.fixedCollectionTime,
-                solution.instance.collectionTimePerCrate
-            )
+        durationTimeSlot = timeSlot.getDuration(solution.instance.getDistance)
 
         '''Contrainte du nombre de routes par time slot'''
         if(len(timeSlot.listRoute) > solution.instance.routePerTimeSlotMax):
@@ -42,9 +38,9 @@ def check(solution, showLog = True, notSommetVisited = False):
                 return solution.checkSolution()
 
             '''Contrainte de capacité du véhicule'''
-            if(route.getTotalFillingRate() > solution.instance.vehiculeCapacityMax):
-                #print(route.getTotalFillingRate())
-                #print(solution.instance.vehiculeCapacityMax)
+            if(route.getTotalQuantity() > route.vehicle.getCapacity()):
+                #print(route.getTotalQuantity())
+                #print(route.vehicle.getCapacity())
                 if(showLog):
                     print("Solution incompatible - Capacité max du véhicule")
                 return False
