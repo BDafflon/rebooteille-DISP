@@ -11,6 +11,7 @@ def setup():
     core.fps = 360
     core.WINDOW_SIZE = [800, 800]
 
+    core.memory('parametres',[])
     core.memory('file',open("./gene.csv","w+"))
     core.memory('file').write('Pu;rho;sigma1;sigma2;sigma3;tau;c;alpha;beta;gamma;Nc,theta;Ns;\n')
     core.memory("metaParametres", [])
@@ -23,6 +24,21 @@ def setup():
     core.memory("popSize", 5);
     core.memory("population", []);
     core.memory("matingpool", [])
+
+    #bornes min/max pour mutation
+    core.memory('parametres').append((50,150)) #Pu
+    core.memory('parametres').append((0.0, 1.0))#rho
+    core.memory('parametres').append((135, 135))#sig1
+    core.memory('parametres').append((70, 70))#sig2
+    core.memory('parametres').append((25, 25))#Sig3
+    core.memory('parametres').append((0, 100))#tau
+    core.memory('parametres').append((0.0, 1.0))#c
+    core.memory('parametres').append((0.0, 1.0))#alpha
+    core.memory('parametres').append((0.0, 1.0))#beta
+    core.memory('parametres').append((0.0, 1.0))#gamma
+    core.memory('parametres').append((100, 2000))#Nc
+    core.memory('parametres').append((0.5, 0.5))#theta
+    core.memory('parametres').append((10, 10))#Ns
 
 
     for i in range(0,core.memory("popSize")):
@@ -102,7 +118,7 @@ def selection():
         parentB = copy.deepcopy(core.memory("matingpool")[random.randint(0, len(core.memory("matingpool")) - 1)])
         child = parentA.crossover(parentB)
         newPath = Dna(child)
-        #newPath.mutation(0.05)
+        newPath.mutation(0.05)
         newPopulation.append(newPath)
 
     core.memory('population', newPopulation)
@@ -180,40 +196,7 @@ def displaySolution():
         plt.draw()
         plt.pause(0.1)
         plt.clf()
-
-
-    '''start=i*10
-        h=core.memory("metaParametresHistorique")[len(core.memory("metaParametresHistorique"))-i-1]
-        Pu=  core.Math.map(h[0],50,150,0,core.WINDOW_SIZE[1]/13)  #50-150
-        core.Draw.rect((255,0,0),(start,800-Pu,10,Pu))
-        rho = core.Math.map(h[1],0,1,0,core.WINDOW_SIZE[1]/13)  #50-150
-        core.Draw.rect((0, 255, 0), (start, 800 - Pu-rho, 10, rho))
-        sg1=core.Math.map(h[2],0,200,0,core.WINDOW_SIZE[1]/13)
-        core.Draw.rect((0, 0, 255), (start, 800 - Pu - rho-sg1, 10, sg1))
-        sg2=core.Math.map(h[3],0,100,0,core.WINDOW_SIZE[1]/13)
-        core.Draw.rect((255, 0, 255), (start, 800 - Pu - rho - sg1-sg2, 10, sg2))
-        sg3=core.Math.map(h[4],0,50,0,core.WINDOW_SIZE[1]/13)
-        core.Draw.rect((0, 255, 255), (start, 800 - Pu - rho - sg1 - sg2-sg3, 10, sg3))
-        to=core.Math.map(h[5],0,100,0,core.WINDOW_SIZE[1]/13)  #50-150
-        core.Draw.rect((255, 255, 0), (start, 800 - Pu - rho - sg1 - sg2-sg3-to, 10, to))
-        c=core.Math.map(h[6],0,1,0,core.WINDOW_SIZE[1]/13)  #50-150
-        core.Draw.rect((255, 255, 255), (start, 800 - Pu - rho - sg1 - sg2 - sg3 - to-c, 10, c))
-        alpha=core.Math.map(h[7],0,1,0,core.WINDOW_SIZE[1]/13)  #50-150
-        core.Draw.rect((100, 100, 100), (start, 800 - Pu - rho - sg1 - sg2 - sg3 - to-c-alpha, 10, alpha))
-        beta=core.Math.map(h[8], 0, 1, 0, core.WINDOW_SIZE[1]/13)  # 50-150
-        core.Draw.rect((250, 100, 0), (start, 800 - Pu - rho - sg1 - sg2 - sg3 - to - c - alpha-beta, 10, beta))
-        gamma = core.Math.map(h[9],0,1,0,core.WINDOW_SIZE[1]/13)  #50-150
-        core.Draw.rect((250, 100, 0), (start, 800 - Pu - rho - sg1 - sg2 - sg3 - to - c - alpha-beta-gamma, 10, gamma))
-        nc = core.Math.map(h[10],100,2000,0,core.WINDOW_SIZE[1]/13)  #50-150
-        core.Draw.rect((0, 100, 250), (start, 800 - Pu - rho - sg1 - sg2 - sg3 - to - c - alpha-beta-gamma-nc, 10, nc))
-        theta = core.Math.map(h[11],0,1,0,core.WINDOW_SIZE[1]/13)  #50-150
-        core.Draw.rect((40, 250, 10), (start, 800 - Pu - rho - sg1 - sg2 - sg3 - to - c - alpha-beta-gamma-nc-theta, 10,theta ))
-        ns = core.Math.map(h[12],0,20,0,core.WINDOW_SIZE[1]/13)  #50-150
-        core.Draw.rect((100, 0, 200), (start, 800 - Pu - rho - sg1 - sg2 - sg3 - to - c - alpha-beta-gamma-nc-theta-ns, 10,ns ))
-'''
-
-
-
+ 
 
 
 def run():
@@ -223,5 +206,6 @@ def run():
     selection()
 
     displaySolution()
+
 
 core.main(setup, run)
