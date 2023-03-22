@@ -25,6 +25,8 @@ def setup():
     core.memory("population", []);
     core.memory("matingpool", [])
 
+
+    #bornes min/max pour mutation
     core.memory('parametres').append((50,150)) #Pu
     core.memory('parametres').append((0.0, 1.0))#rho
     core.memory('parametres').append((135, 135))#sig1
@@ -205,5 +207,6 @@ def run():
     selection()
 
     displaySolution()
+
 
 core.main(setup, run)
