@@ -1,19 +1,19 @@
 import copy
 import random
 import core
-from pygame.math import Vector2
 from dna import Dna
 import matplotlib.pyplot as plt
 from collections import deque
+
 
 def setup():
     print("Setup START---------")
     core.fps = 360
     core.WINDOW_SIZE = [800, 800]
 
-    core.memory('parametres',[])
-    core.memory('file',open("./gene.csv","w+"))
-    core.memory('file').write('Pu;rho;sigma1;sigma2;sigma3;tau;c;alpha;beta;gamma;Nc,theta;Ns;Fitness\n')
+    core.memory('parametres', [])
+    core.memory('file', open("./gene.csv", "w+"))
+    core.memory('file').write('Pu;rho;sigma1;sigma2;sigma3;tau;c;alpha;beta;gamma;Nc;theta;Ns;Fitness\n')
     core.memory("metaParametres", [])
     core.memory("metaParametresNb", 13)
     core.memory("metaParametresHistorique", [])
@@ -21,53 +21,49 @@ def setup():
     core.memory("bestFintness", 89999999999999999999999999)
     core.memory("bestMetaParametres", [])
 
-    core.memory("popSize", 5);
-    core.memory("population", []);
+    core.memory("popSize", 5)
+    core.memory("population", [])
     core.memory("matingpool", [])
 
+    # bornes min/max pour mutation
+    core.memory('parametres').append((50, 150))  # Pu
+    core.memory('parametres').append((0.0, 1.0))  # rho
+    core.memory('parametres').append((135, 135))  # sig1
+    core.memory('parametres').append((70, 70))  # sig2
+    core.memory('parametres').append((25, 25))  # sig3
+    core.memory('parametres').append((0, 100))  # tau
+    core.memory('parametres').append((0.0, 1.0))  # c
+    core.memory('parametres').append((0.0, 1.0))  # alpha
+    core.memory('parametres').append((0.0, 1.0))  # beta
+    core.memory('parametres').append((0.0, 1.0))  # gamma
+    core.memory('parametres').append((100, 2000))  # Nc
+    core.memory('parametres').append((0.5, 0.5))  # theta
+    core.memory('parametres').append((10, 10))  # Ns
 
-    #bornes min/max pour mutation
-    core.memory('parametres').append((50,150)) #Pu
-    core.memory('parametres').append((0.0, 1.0))#rho
-    core.memory('parametres').append((135, 135))#sig1
-    core.memory('parametres').append((70, 70))#sig2
-    core.memory('parametres').append((25, 25))#Sig3
-    core.memory('parametres').append((0, 100))#tau
-    core.memory('parametres').append((0.0, 1.0))#c
-    core.memory('parametres').append((0.0, 1.0))#alpha
-    core.memory('parametres').append((0.0, 1.0))#beta
-    core.memory('parametres').append((0.0, 1.0))#gamma
-    core.memory('parametres').append((100, 2000))#Nc
-    core.memory('parametres').append((0.5, 0.5))#theta
-    core.memory('parametres').append((10, 10))#Ns
-
-
-    for i in range(0,core.memory("popSize")):
+    for i in range(0, core.memory("popSize")):
         gene = []
-        gene.append(random.randint(50, 150)) #Pu
-        gene.append(random.randint(0, 100)/100) #rho
-        gene.append(135) #sigma1
-        gene.append(70) #sigma2
-        gene.append(25) #sigma3
-        gene.append(random.randint(0, 100)) #tau
-        gene.append(random.randint(0, 100)/100) #c
-        alpha = random.randint(0, 100)/100
-        beta = random.randint(0, 100)/100
-        gamma = 1-alpha-beta
-        while(0 < gamma < 1):
-            alpha = random.randint(0, 100)/100
-            beta = random.randint(0, 100)/100
-            gamma = 1-alpha-beta
-        gene.append(alpha) #alpha
-        gene.append(beta) #beta
-        gene.append(gamma) #gamma
-        gene.append(random.randint(100, 2000)) #Nc
-        gene.append(0.5) #theta
-        gene.append(10) #Ns
+        gene.append(random.randint(50, 150))  # Pu
+        gene.append(random.randint(0, 100) / 100)  # rho
+        gene.append(135)  # sigma1
+        gene.append(70)  # sigma2
+        gene.append(25)  # sigma3
+        gene.append(random.randint(0, 100))  # tau
+        gene.append(random.randint(0, 100) / 100)  # c
+        alpha = random.randint(0, 100) / 100
+        beta = random.randint(0, 100) / 100
+        gamma = 1 - alpha - beta
+        while gamma < 0 or 1 < gamma:
+            alpha = random.randint(0, 100) / 100
+            beta = random.randint(0, 100) / 100
+            gamma = 1 - alpha - beta
+        gene.append(alpha)  # alpha
+        gene.append(beta)  # beta
+        gene.append(gamma)  # gamma
+        gene.append(random.randint(100, 2000))  # Nc
+        gene.append(0.5)  # theta
+        gene.append(10)  # Ns
 
         core.memory("population").append(Dna(gene))
-
-
 
     print("Setup END-----------")
 
@@ -82,26 +78,24 @@ def evaluate():
     for i, p in enumerate(core.memory("population")):
         if p.fitness > maxfit:
             maxfit = p.fitness
-            indexBest=i
-
+            indexBest = i
 
     if indexBest >= 0:
         core.memory("bestMetaParametres", core.memory("population")[indexBest].gene)
         core.memory("metaParametresHistorique").append(core.memory("population")[indexBest].gene)
-        core.memory('file').write(str(core.memory("population")[indexBest].gene[0])+";")
-        core.memory('file').write(str(core.memory("population")[indexBest].gene[1])+";")
+        core.memory('file').write(str(core.memory("population")[indexBest].gene[0]) + ";")
+        core.memory('file').write(str(core.memory("population")[indexBest].gene[1]) + ";")
         core.memory('file').write(str(core.memory("population")[indexBest].gene[2]) + ";")
         core.memory('file').write(str(core.memory("population")[indexBest].gene[3]) + ";")
         core.memory('file').write(str(core.memory("population")[indexBest].gene[4]) + ";")
-        core.memory('file').write(str( core.memory("population")[indexBest].gene[5]) + ";")
-        core.memory('file').write(str( core.memory("population")[indexBest].gene[6]) + ";")
+        core.memory('file').write(str(core.memory("population")[indexBest].gene[5]) + ";")
+        core.memory('file').write(str(core.memory("population")[indexBest].gene[6]) + ";")
         core.memory('file').write(str(core.memory("population")[indexBest].gene[7]) + ";")
         core.memory('file').write(str(core.memory("population")[indexBest].gene[9]) + ";")
-        core.memory('file').write(str( core.memory("population")[indexBest].gene[10]) + ";")
-        core.memory('file').write( str(core.memory("population")[indexBest].gene[11]) + ";")
-        core.memory('file').write(str( core.memory("population")[indexBest].gene[12]) + ";")
+        core.memory('file').write(str(core.memory("population")[indexBest].gene[10]) + ";")
+        core.memory('file').write(str(core.memory("population")[indexBest].gene[11]) + ";")
+        core.memory('file').write(str(core.memory("population")[indexBest].gene[12]) + ";")
         core.memory('file').write(str(maxfit) + ";\n")
-
 
     for p in core.memory("population"):
         p.fitness = p.fitness / maxfit
@@ -127,12 +121,12 @@ def selection():
 
 
 def displaySolution():
-    print("meta",core.memory("metaParametresHistorique"))
-    Pu= deque(maxlen=40)
-    rhp= deque(maxlen=40)
-    sg1= deque(maxlen=40)
-    sg2= deque(maxlen=40)
-    sg3= deque(maxlen=40)
+    print("meta", core.memory("metaParametresHistorique"))
+    Pu = deque(maxlen=40)
+    rhp = deque(maxlen=40)
+    sg1 = deque(maxlen=40)
+    sg2 = deque(maxlen=40)
+    sg3 = deque(maxlen=40)
     to = deque(maxlen=40)
     c = deque(maxlen=40)
     alpha = deque(maxlen=40)
