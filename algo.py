@@ -13,7 +13,7 @@ def setup():
 
     core.memory('parametres',[])
     core.memory('file',open("./gene.csv","w+"))
-    core.memory('file').write('Pu;rho;sigma1;sigma2;sigma3;tau;c;alpha;beta;gamma;Nc,theta;Ns;\n')
+    core.memory('file').write('Pu;rho;sigma1;sigma2;sigma3;tau;c;alpha;beta;gamma;Nc,theta;Ns;Fitness\n')
     core.memory("metaParametres", [])
     core.memory("metaParametresNb", 13)
     core.memory("metaParametresHistorique", [])
@@ -24,6 +24,7 @@ def setup():
     core.memory("popSize", 5);
     core.memory("population", []);
     core.memory("matingpool", [])
+
 
     #bornes min/max pour mutation
     core.memory('parametres').append((50,150)) #Pu
@@ -98,7 +99,8 @@ def evaluate():
         core.memory('file').write(str(core.memory("population")[indexBest].gene[9]) + ";")
         core.memory('file').write(str( core.memory("population")[indexBest].gene[10]) + ";")
         core.memory('file').write( str(core.memory("population")[indexBest].gene[11]) + ";")
-        core.memory('file').write(str( core.memory("population")[indexBest].gene[12]) + ";\n")
+        core.memory('file').write(str( core.memory("population")[indexBest].gene[12]) + ";")
+        core.memory('file').write(str(maxfit) + ";\n")
 
 
     for p in core.memory("population"):
@@ -196,7 +198,6 @@ def displaySolution():
         plt.draw()
         plt.pause(0.1)
         plt.clf()
- 
 
 
 def run():
