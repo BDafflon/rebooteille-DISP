@@ -1,9 +1,9 @@
 import os.path
 import pandas as pd
-from alns.ALNS import ALNS
+
 
 def toCsv(alns, outputPath="./result/", outputName=None, reset=False):
-    if outputName == None:
+    if outputName is None:
         outputName = alns.instance.getName()
     fileName = outputPath + "alns_" + outputName + ".csv"
 
@@ -25,19 +25,20 @@ def toCsv(alns, outputPath="./result/", outputName=None, reset=False):
             nIter=alns.nIter
         )
         for method in alns.USED_METHODS:
-            value = 100*alns.USED_METHODS_UNTIL_LAST_BEST[method]/alns.evolution_iter_best[-1]
+            value = 100 * alns.USED_METHODS_UNTIL_LAST_BEST[method] / alns.evolution_iter_best[-1]
             line += "; " + str(round(value, 1))
         outfile.write(line + "\n")
     print("ALNS is saved in " + fileName)
 
+
 def toXlsx(alns, outputPath="./result/", outputName=None, reset=False):
-    if outputName == None:
+    if outputName is None:
         outputName = alns.instance.getName()
     fileName = outputPath + "alns_" + outputName + ".xlsx"
 
     if not os.path.isfile(fileName) or reset:
         dfResult = pd.DataFrame()
-    else :
+    else:
         dfResult = pd.read_excel(fileName)
 
     newdf = pd.DataFrame()
@@ -51,8 +52,8 @@ def toXlsx(alns, outputPath="./result/", outputName=None, reset=False):
     newdf['Iter_best'] = alns.evolution_iter_best[-1]
     newdf['Time_best'] = alns.evolution_time_best[-1]
     newdf['Iterations'] = alns.nIter
-    for k in alns.USED_METHODS :
-        newdf[k] = round(100*alns.USED_METHODS_UNTIL_LAST_BEST[k]/alns.evolution_iter_best[-1],1)
+    for k in alns.USED_METHODS:
+        newdf[k] = round(100 * alns.USED_METHODS_UNTIL_LAST_BEST[k] / alns.evolution_iter_best[-1], 1)
     dfResult = pd.concat([dfResult, newdf], ignore_index=True)
     dfResult.to_excel(fileName)
     print("ALNS is saved in " + fileName)

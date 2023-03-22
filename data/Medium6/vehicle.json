@@ -1,6 +1,6 @@
 [
     {
-        "name": "camion",
+        "name": "truck",
         "speed": 30,
         "capacity": 110,
         "cost": 10,

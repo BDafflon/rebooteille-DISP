@@ -2,6 +2,7 @@
 Source from project ALNS 2022, ALEXI OMAR DJAMA
 """
 
+
 class Route:
     INDICE = 1
 
@@ -36,7 +37,7 @@ class Route:
     def removeClient(self, clientToRemove):
         i = 0
         for client in self.trajet:
-            if (clientToRemove.getIndice() == client.getIndice()):
+            if clientToRemove.getIndice() == client.getIndice():
                 break
             i = i + 1
         client = self.trajet.pop(i)
@@ -52,12 +53,13 @@ class Route:
     def getDuration(self, distFunction):
         self.duration = 0
 
-        if(len(self.trajet) > 1):
-            for i in range(len(self.trajet) -1):
+        if len(self.trajet) > 1:
+            for i in range(len(self.trajet) - 1):
                 clientDepart = self.trajet[i]
                 clientArrivee = self.trajet[i + 1]
 
-                time = distFunction(clientDepart.getIndice(), clientArrivee.getIndice())/self.vehicle.getSpeed() * 60 #min
+                time = distFunction(clientDepart.getIndice(),
+                                    clientArrivee.getIndice()) / self.vehicle.getSpeed() * 60  # min
                 self.duration += time
                 self.duration += self.vehicle.getFixedCollectionTime()
                 self.duration += self.vehicle.getCollectionTimePerCrate() * clientArrivee.getQuantity()
@@ -65,11 +67,11 @@ class Route:
         return self.duration
 
     def copy(self, routeToCopy):
-        #Copie des variables
+        # Copie des variables
         self.indice = routeToCopy.indice
         self.duration = routeToCopy.duration
 
-        #Copie des clients
+        # Copie des clients
         self.trajet = []
 
         for clientToCopy in routeToCopy.trajet:
@@ -79,7 +81,7 @@ class Route:
         print("\tRoute {i} :".format(i=positionInListTimeSlot))
         print("\t\t- Total Quantity = {q}".format(q=self.totalQuantity))
         print("\t\t- Duration = {d}".format(d=round(self.duration, 2)))
-        if(len(self.trajet) == 0):
+        if len(self.trajet) == 0:
             return
         route = "{i}".format(i=self.trajet[0].getIndice())
         for client in self.trajet[1:]:

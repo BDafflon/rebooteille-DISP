@@ -1,10 +1,10 @@
 """
 Source from project ALNS 2022, ALEXI OMAR DJAMA
 """
-from instance.Instance import Instance
 from instance.TimeSlot import TimeSlot
 import math
 from solution.checkSolution import check
+
 
 class Solution:
 

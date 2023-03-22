@@ -3,6 +3,7 @@ Source from project ALNS 2022, ALEXI OMAR DJAMA
 """
 import geopy.distance as gd
 
+
 class Instance:
     def __init__(self, listClient, listVehicle, numberTimeSlotMax, routePerTimeSlotMax, durationTimeSlotMax, distTravel={}, name="present"):
         self.listClient = listClient
@@ -19,24 +20,18 @@ class Instance:
     def getName(self):
         return self.name
 
-    def getClientByClientId(self, clientId):
-        for client in self.listClient:
-            if(client.getIndice() == clientId):
-                print("{i} vs {j}".format(i=clientId, j=client.getIndice()))
-                return client
-
     def getDistance(self, firstClientId, secondClientId):
         return self.distTravel[(firstClientId, secondClientId)]
 
     def display(self, showClients=False, showDistTravel=False):
-        # showClients est un booleen correspondant à l'affichage la liste des clients
-        # showDistTravel est un booleen correspondant à l'affichage de la distance entre chaque client
+        # showClients est un boolean correspondant à l'affichage la liste des clients
+        # showDistTravel est un boolean correspondant à l'affichage de la distance entre chaque client
         print("--- Instance {name} ---".format(name=self.name))
         print("Routes per time slot max = {rts}".format(rts=self.routePerTimeSlotMax))
         print("Number time slot max = {nts}".format(nts=self.numberTimeSlotMax))
         print("Duration time slot max = {dts}".format(dts=self.durationTimeSlotMax))
 
-        if(showClients):
+        if showClients:
             print("* List of clients :")
             for client in self.listClient:
                 client.display()
@@ -45,7 +40,7 @@ class Instance:
         for vehicle in self.listVehicle:
             vehicle.display()
 
-        if(showDistTravel):
+        if showDistTravel:
             print("* Distance travel :")
             for cle, valeur in self.distTravel.items():
                 print("\t-{cle} : {valeur}".format(cle=cle, valeur=valeur))

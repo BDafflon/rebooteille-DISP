@@ -2,6 +2,7 @@
 Source from project ALNS 2022, ALEXI OMAR DJAMA
 """
 
+
 class Client:
     def __init__(self, indice=0, quantity=0, capacity=0, request=0, location=(0,0)):
         self.indice = indice

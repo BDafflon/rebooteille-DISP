@@ -2,6 +2,7 @@ import json
 import os.path
 from solution.Solution import Solution
 
+
 def toJson(solution, solutionPath="./result/", fileName=None):
     dictResult = {
         "name": solution.instance.getName(),
@@ -57,7 +58,7 @@ def toJson(solution, solutionPath="./result/", fileName=None):
             dictTimeSlot["timeSlot"].append(dictRoute)
         dictResult["routing"].append(dictTimeSlot)
 
-    if fileName == None:
+    if fileName is None:
         fileName = solution.instance.getName()
     solutionName = solutionPath + fileName + ".json"
     with open(solutionName, "w") as outfile:
@@ -68,13 +69,15 @@ def toJson(solution, solutionPath="./result/", fileName=None):
     del dictTimeSlot
     del dictResult
 
+
 def toCsv(solution, solutionPath="./result/", fileName=None, reset=False):
-    if fileName == None:
+    if fileName is None:
         fileName = solution.instance.getName()
     solutionName = solutionPath + fileName + ".csv"
     if not os.path.isfile(solutionName) or reset:
         with open(solutionName, "w") as outfile:
-            outfile.write("Cost; Time; Duration; Request priority penalty; Inventory priority penalty; Number of time slots used; Number of iterations; Pu; Rho; Sigma 1; Sigma 2; Sigma 3; Tau; C; Alpha; Beta; Gamma; Nc; Theta; Ns\n")
+            outfile.write(
+                "Cost; Time; Duration; Request priority penalty; Inventory priority penalty; Number of time slots used; Number of iterations; Pu; Rho; Sigma 1; Sigma 2; Sigma 3; Tau; C; Alpha; Beta; Gamma; Nc; Theta; Ns\n")
     with open(solutionName, "a") as outfile:
         line = "{cost}; {time}; {duration}; {request}; {inventory}; {timeSlots}; {nIter}; {pu}; {rho}; {sigma1}; {sigma2}; {sigma3}; {tau}; {c}; {alpha}; {beta}; {gamma}; {nc}; {theta}; {ns}\n".format(
             cost=solution.cost,

@@ -1,6 +1,5 @@
 import pandas as pd
 from alns.ALNS import ALNS
-import time
 from instance.parser import parseForALNS, parse
 import solution.writeSolution as writeSolution
 import alns.writeALNS as writeALNS
