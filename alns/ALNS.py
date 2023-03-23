@@ -186,7 +186,7 @@ class ALNS:
 
         # Réinitialisation des visites des clients
         for client in self.instance.listClient:
-            client.setnotVisited()
+            client.setNotVisited()
 
         if not self.currentSolution.checkSolution():
             # Création d'une nouvelle solution de départ

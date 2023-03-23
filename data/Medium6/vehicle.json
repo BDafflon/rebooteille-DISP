@@ -5,7 +5,7 @@
         "capacity": 110,
         "cost": 10,
         "driver": [
-            "Bob"
+            "Toto"
         ],
         "fixedCollectionTime": 4,
         "collectionTimePerCrate": 0.25

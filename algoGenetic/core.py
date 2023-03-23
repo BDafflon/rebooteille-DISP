@@ -1,8 +1,5 @@
-import copy
 import inspect
 import sys
-from math import *
-from random import *
 
 import pygame
 
@@ -382,7 +379,7 @@ class Texture:
     def show(self):
         if self.display:
             if self.box:
-                core.Draw.rect((0,255,0),(self.pos.x,self.pos.y,self.w,self.h),1)
+                core.Draw.rect((0, 255, 0), (self.pos.x, self.pos.y, self.w, self.h), 1)
             if self.ready:
                 self.sprit.set_alpha(self.alpha)
                 rotated_image = pygame.transform.rotate(self.sprit, self.angle)

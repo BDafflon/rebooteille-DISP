@@ -9,6 +9,23 @@ class Vehicle:
         self.collectionTimePerCrate = ctc
         self.cost = cost
 
+    def getName(self):
+        return self.name
+
+    def getDrivers(self):
+        return self.listDriver
+
+    def getDriver(self):
+        if not self.listDriver:
+            return "unknown"
+        return self.listDriver[0]
+
+    def setDriver(self, driverId):
+        if driverId < 0 or len(self.listDriver) <= driverId:
+            raise Exception("Wrong driver id {i} isn't in the list".format(i=driverId))
+        keep = self.listDriver[driverId]
+        self.listDriver = [keep]
+
     def getCapacity(self):
         return self.capacity
 

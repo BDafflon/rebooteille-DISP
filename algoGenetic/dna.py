@@ -18,18 +18,10 @@ class Dna:
         return dist
 
     def calculateFitness(self):
-        """
-        dist = 0
-        for i in range(0,len(self.dna)-1):
-            dist+=cities[self.dna[i]].distance_to(cities[self.dna[i+1]])
-
-        self.fitness = 1/ (pow(dist, 8) + 1)
-        """
-        instance = parse("./data/Medium6/")
+        instance = parse("data/Medium6/")
         alns = ALNS(instance)
-        solution = alns.solve(self.gene[0], self.gene[1], self.gene[2], self.gene[3], self.gene[4], self.gene[5],
-                              self.gene[6], self.gene[7], self.gene[8], self.gene[9], self.gene[10], self.gene[11],
-                              self.gene[12])
+        solution = alns.solve(self.gene[0], self.gene[1], 130, 70, 25, self.gene[2], self.gene[3], self.gene[4],
+                              self.gene[5], self.gene[6], 2000, self.gene[7], self.gene[8])
         self.fitness = solution.getCost()
 
     def crossover(self, partner):
@@ -48,7 +40,7 @@ class Dna:
         if random.uniform(0, 1) < range:
             print("mutation")
             i = random.randint(0, len(self.gene) - 1)
-            if 6 < i < 9:
+            if 3 < i < 7:
                 alpha = random.uniform(core.memory('parametres')[i][0], core.memory('parametres')[i][1])
                 beta = random.uniform(core.memory('parametres')[i][0], core.memory('parametres')[i][1])
                 gamma = 1 - alpha - beta

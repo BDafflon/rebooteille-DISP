@@ -12,8 +12,8 @@ def setup():
     core.WINDOW_SIZE = [800, 800]
 
     core.memory('parametres', [])
-    core.memory('file', open("./gene.csv", "w+"))
-    core.memory('file').write('Pu;rho;sigma1;sigma2;sigma3;tau;c;alpha;beta;gamma;Nc;theta;Ns;Fitness\n')
+    core.memory('file', open("algoGenetic/gene.csv", "w+"))
+    core.memory('file').write('Pu;rho;tau;c;alpha;beta;gamma;theta;Ns;Fitness\n')
     core.memory("metaParametres", [])
     core.memory("metaParametresNb", 13)
     core.memory("metaParametresHistorique", [])
@@ -26,42 +26,37 @@ def setup():
     core.memory("matingpool", [])
 
     # bornes min/max pour mutation
-    core.memory('parametres').append((50, 150))  # Pu
-    core.memory('parametres').append((0.0, 1.0))  # rho
-    core.memory('parametres').append((135, 135))  # sig1
-    core.memory('parametres').append((70, 70))  # sig2
-    core.memory('parametres').append((25, 25))  # sig3
+    core.memory('parametres').append((100, 100))  # Pu
+    core.memory('parametres').append((0.33, 0.33))  # rho
     core.memory('parametres').append((0, 100))  # tau
     core.memory('parametres').append((0.0, 1.0))  # c
     core.memory('parametres').append((0.0, 1.0))  # alpha
-    core.memory('parametres').append((0.0, 1.0))  # beta
-    core.memory('parametres').append((0.0, 1.0))  # gamma
-    core.memory('parametres').append((100, 2000))  # Nc
+    core.memory('parametres').append((0.1, 1.0))  # beta
+    core.memory('parametres').append((0.1, 1.0))  # gamma
     core.memory('parametres').append((0.5, 0.5))  # theta
     core.memory('parametres').append((10, 10))  # Ns
 
-    for i in range(0, core.memory("popSize")):
-        gene = []
-        gene.append(random.randint(50, 150))  # Pu
-        gene.append(random.randint(0, 100) / 100)  # rho
-        gene.append(135)  # sigma1
-        gene.append(70)  # sigma2
-        gene.append(25)  # sigma3
-        gene.append(random.randint(0, 100))  # tau
-        gene.append(random.randint(0, 100) / 100)  # c
-        alpha = random.randint(0, 100) / 100
-        beta = random.randint(0, 100) / 100
-        gamma = 1 - alpha - beta
-        while gamma < 0 or 1 < gamma:
-            alpha = random.randint(0, 100) / 100
-            beta = random.randint(0, 100) / 100
-            gamma = 1 - alpha - beta
-        gene.append(alpha)  # alpha
-        gene.append(beta)  # beta
-        gene.append(gamma)  # gamma
-        gene.append(random.randint(100, 2000))  # Nc
-        gene.append(0.5)  # theta
-        gene.append(10)  # Ns
+    for j in range(0, core.memory("popSize")):
+        gene = list(range(0, 9))
+        for i in range(0, 9):
+            if 3 < i < 7:
+                alpha = random.uniform(core.memory('parametres')[i][0], core.memory('parametres')[i][1])
+                beta = random.uniform(core.memory('parametres')[i][0], core.memory('parametres')[i][1])
+                gamma = 1 - alpha - beta
+                while gamma <= 0 or 1 < gamma:
+                    alpha = random.uniform(core.memory('parametres')[i][0], core.memory('parametres')[i][1])
+                    beta = random.uniform(core.memory('parametres')[i][0], core.memory('parametres')[i][1])
+                    gamma = 1 - alpha - beta
+
+                gene[4] = alpha
+                gene[5] = beta
+                gene[6] = gamma
+            else:
+                if isinstance(core.memory('parametres')[i][0], int):
+                    gene[i] = random.randint(core.memory('parametres')[i][0], core.memory('parametres')[i][1])
+                else:
+                    if isinstance(core.memory('parametres')[i][0], float):
+                        gene[i] = random.uniform(core.memory('parametres')[i][0], core.memory('parametres')[i][1])
 
         core.memory("population").append(Dna(gene))
 
@@ -73,12 +68,16 @@ def evaluate():
         p.calculateFitness()
 
     indexBest = -1
+    minfit = core.memory("population")[0].fitness
     maxfit = core.memory("population")[0].fitness
 
     for i, p in enumerate(core.memory("population")):
+        if p.fitness <= minfit:
+            minfit = p.fitness
+            indexBest = i
+
         if p.fitness > maxfit:
             maxfit = p.fitness
-            indexBest = i
 
     if indexBest >= 0:
         core.memory("bestMetaParametres", core.memory("population")[indexBest].gene)
@@ -91,19 +90,18 @@ def evaluate():
         core.memory('file').write(str(core.memory("population")[indexBest].gene[5]) + ";")
         core.memory('file').write(str(core.memory("population")[indexBest].gene[6]) + ";")
         core.memory('file').write(str(core.memory("population")[indexBest].gene[7]) + ";")
-        core.memory('file').write(str(core.memory("population")[indexBest].gene[9]) + ";")
-        core.memory('file').write(str(core.memory("population")[indexBest].gene[10]) + ";")
-        core.memory('file').write(str(core.memory("population")[indexBest].gene[11]) + ";")
-        core.memory('file').write(str(core.memory("population")[indexBest].gene[12]) + ";")
-        core.memory('file').write(str(maxfit) + ";\n")
+        core.memory('file').write(str(core.memory("population")[indexBest].gene[8]) + ";")
+        core.memory('file').write(str(minfit) + ";\n")
 
     for p in core.memory("population"):
-        p.fitness = p.fitness / maxfit
+        f = core.Math.map(p.fitness, minfit, maxfit, 1, 0)
+        print(p.fitness, ' ', f)
+        p.fitness = f
 
     core.memory("matingpool", [])
     for p in core.memory('population'):
         n = p.fitness * 10
-        for i in range(0, int(n)):
+        for i in range(0, int(n)+1):
             core.memory("matingpool").append(p)
 
 
@@ -124,45 +122,30 @@ def displaySolution():
     print("meta", core.memory("metaParametresHistorique"))
     Pu = deque(maxlen=40)
     rhp = deque(maxlen=40)
-    sg1 = deque(maxlen=40)
-    sg2 = deque(maxlen=40)
-    sg3 = deque(maxlen=40)
     to = deque(maxlen=40)
     c = deque(maxlen=40)
     alpha = deque(maxlen=40)
     beta = deque(maxlen=40)
     gamma = deque(maxlen=40)
-    nc = deque(maxlen=40)
     theta = deque(maxlen=40)
     ns = deque(maxlen=40)
 
     for h in core.memory("metaParametresHistorique"):
         Pu.append(h[0])
         rhp.append(h[1])
-        sg1.append(h[2])
-        sg2.append(h[3])
-        sg3.append(h[4])
-        to.append(h[5])
-        c.append(h[6])
-        alpha.append(h[7])
-        beta.append(h[8])
-        gamma.append(h[9])
-        nc.append(h[10])
-        theta.append(h[11])
-        ns.append(h[12])
+        to.append(h[2])
+        c.append(h[3])
+        alpha.append(h[4])
+        beta.append(h[5])
+        gamma.append(h[6])
+        theta.append(h[7])
+        ns.append(h[8])
 
         plt.plot(Pu)
         plt.scatter(range(len(Pu)), Pu, c='#c12e2e')
 
         plt.plot(rhp)
         plt.scatter(range(len(rhp)), rhp, c='#48c569')
-
-        plt.plot(sg1)
-        plt.scatter(range(len(sg1)), sg1, c='#5bc12e')
-        plt.plot(sg2)
-        plt.scatter(range(len(sg2)), sg2, c='#6ea49b')
-        plt.plot(sg3)
-        plt.scatter(range(len(sg3)), sg3, c='#4166e3')
 
         plt.plot(to)
         plt.scatter(range(len(to)), to, c='#d964e7')
@@ -178,9 +161,6 @@ def displaySolution():
 
         plt.plot(gamma)
         plt.scatter(range(len(gamma)), gamma, c='#16f8ff')
-
-        plt.plot(nc)
-        plt.scatter(range(len(nc)), nc, c='#c2478a')
 
         plt.plot(theta)
         plt.scatter(range(len(theta)), theta, c='#c14343')

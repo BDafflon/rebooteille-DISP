@@ -86,10 +86,10 @@ def check(solution, showLog=True, notSommetVisited=False):
 
                 # Réinitialisation complète de la liste avant de return False
                 for clientVisited in solution.instance.listClient:
-                    clientVisited.setnotVisited()
+                    clientVisited.setNotVisited()
 
                 return False
             else:
                 # S'il a bien été visité on le réinitialise
-                client.setnotVisited()
+                client.setNotVisited()
     return True

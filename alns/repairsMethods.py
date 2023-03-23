@@ -38,7 +38,7 @@ def repair_randomV2(solution, keptinmemory, instance, repairdontwork):
     for client in instance.listClient:
         if not client.isVisited():
             listClientMissing.append(client)
-        client.setnotVisited()
+        client.setNotVisited()
 
     # Mélange des positions manquantes dans un ordre aleatoire
     listClientMissing = methods.order_ListClient_random(listClientMissing)
@@ -194,7 +194,7 @@ def repair_randomv1(solution, keptinmemory, instance, repairdontwork):
     for client in instance.listClient:
         if not client.isVisited():
             listClientMissing.append(client)
-        client.setnotVisited()
+        client.setNotVisited()
 
     # Mélange des positions manquantes aleatoirement
     listClientMissing = methods.order_ListClient_random(listClientMissing)
@@ -315,7 +315,7 @@ def repair_2_regret(solution, keptinmemory, instance, repairdontwork):
         if (not client.isVisited()) and client.indice != 0:
             # print(client.indice)
             listClientMissing.append(client)
-        client.setnotVisited()
+        client.setNotVisited()
     solution.calculateCost()
     nbclientinserted = 0
 
@@ -437,7 +437,7 @@ def repair_FirstPositionAvailable_maxratio_listClient(solution, keptinmemory, in
         if (not client.isVisited()) and client.indice != 0:
             # print(client.indice)
             listClientMissing.append(client)
-        client.setnotVisited()
+        client.setNotVisited()
 
     # Tri de la liste selon un critère de la méthode orderListOperator
     listClientMissing = methods.order_ListClient_by_ratio(listClientMissing)
@@ -588,7 +588,7 @@ def repair_FirstPositionAvailable_randomlistClient(solution, keptinmemory, insta
         if (not client.isVisited()) and client.indice != 0:
             # print(client.indice)
             listClientMissing.append(client)
-        client.setnotVisited()
+        client.setNotVisited()
 
     # Tri de la liste selon un critère de la méthode orderListOperator
     listClientMissing = methods.order_ListClient_random(listClientMissing)
@@ -732,7 +732,7 @@ def repair_random_best_insertion(solution, keptinmemory, instance, repairdontwor
         if (not client.isVisited()) and client.indice != 0:
             # print(client.indice)
             listClientMissing.append(client)
-        client.setnotVisited()
+        client.setNotVisited()
 
     # Tri de la liste selon un critère de la méthode orderListOperator
     listClientMissing = methods.order_ListClient_random(listClientMissing)
@@ -829,7 +829,7 @@ def repair_max_ratio_best_insertion(solution, keptinmemory, instance, repairdont
     for client in instance.listClient:
         if (not client.isVisited()) and client.indice != 0:
             listClientMissing.append(client)
-        client.setnotVisited()
+        client.setNotVisited()
 
     # Tri de la liste selon un critère de la méthode orderListOperator
     listClientMissing = methods.order_ListClient_by_ratio(listClientMissing)
