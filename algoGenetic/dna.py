@@ -20,8 +20,8 @@ class Dna:
     def calculateFitness(self):
         instance = parse("data/Medium6/")
         alns = ALNS(instance)
-        solution = alns.solve(self.gene[0], self.gene[1], 130, 70, 25, self.gene[2], self.gene[3], self.gene[4],
-                              self.gene[5], self.gene[6], 2000, self.gene[7], self.gene[8])
+        solution = alns.solve(100, 0.33, 130, 70, 25, self.gene[0], self.gene[1], self.gene[2],
+                              self.gene[3], self.gene[4], 2000, self.gene[5], self.gene[6])
         self.fitness = solution.getCost()
 
     def crossover(self, partner):
@@ -40,7 +40,7 @@ class Dna:
         if random.uniform(0, 1) < range:
             print("mutation")
             i = random.randint(0, len(self.gene) - 1)
-            if 3 < i < 7:
+            if 1 < i < 5:
                 alpha = random.uniform(core.memory('parametres')[i][0], core.memory('parametres')[i][1])
                 beta = random.uniform(core.memory('parametres')[i][0], core.memory('parametres')[i][1])
                 gamma = 1 - alpha - beta
@@ -49,9 +49,9 @@ class Dna:
                     beta = random.uniform(core.memory('parametres')[i][0], core.memory('parametres')[i][1])
                     gamma = 1 - alpha - beta
 
-                self.gene[7] = alpha
-                self.gene[8] = beta
-                self.gene[9] = gamma
+                self.gene[2] = alpha
+                self.gene[3] = beta
+                self.gene[4] = gamma
             else:
                 if isinstance(core.memory('parametres')[i][0], int):
                     self.gene[i] = random.randint(core.memory('parametres')[i][0], core.memory('parametres')[i][1])

@@ -79,14 +79,20 @@ def readVehicles(fileName):
 
 def readClients(fileName):
     listClient = []
-    dfClient = pd.read_excel(fileName)
+    dfClient = pd.read_csv(fileName)
     for i in range(len(dfClient)):
         id = i + 1
+        name = dfClient['Name'][i]
         quantity = dfClient['Quantité'][i]
         capacity = dfClient['Nb Casiers'][i]
         request = dfClient['Requête'][i]
         location = (dfClient['latitude'][i], dfClient['longitude'][i])
-        listClient.append(Client(id, quantity, capacity, request, location))
+        morningOpening = dfClient['morningOpening'][i]
+        morningClosing = dfClient['morningClosing'][i]
+        afternoonOpening = dfClient['afternoonOpening'][i]
+        afternoonClosing = dfClient['afternoonClosing'][i]
+        listClient.append(Client(id, quantity, capacity, request, location, morningOpening,
+                                 morningClosing, afternoonOpening, afternoonClosing, name))
     return listClient
 
 
@@ -94,7 +100,9 @@ def readContext(fileName):
     dfContext = pd.read_json(fileName, orient='index').transpose()
     name = dfContext['name'][0]
     location = (dfContext['depotLatitude'][0], dfContext['depotLongitude'][0])
-    depot = Client(indice=0, location=location, capacity=1)
+    start = dfContext['routingStart'][0]
+    end = dfContext['routingEnd'][0]
+    depot = Client(indice=0, location=location, capacity=1, morningOpening=start, morningClosing=end, name="depot")
     ntm = dfContext['numberTimeSlotMax'][0]
     rpt = dfContext['routePerTimeSlotMax'][0]
     dtm = dfContext['durationTimeSlotMax'][0]
@@ -103,7 +111,7 @@ def readContext(fileName):
 
 def parse(filePath):
     listVehicle = readVehicles(filePath + "vehicle.json")
-    listClient = readClients(filePath + "points.xlsx")
+    listClient = readClients(filePath + "points.csv")
     name, depot, ntm, rpt, dtm = readContext(filePath + "context.json")
     listClient = [depot] + listClient
     return Instance(listClient, listVehicle, ntm, rpt, dtm, name=name)

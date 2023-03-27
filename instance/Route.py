@@ -54,15 +54,19 @@ class Route:
         self.duration = 0
 
         if len(self.trajet) > 1:
-            for i in range(len(self.trajet) - 1):
-                clientDepart = self.trajet[i]
-                clientArrivee = self.trajet[i + 1]
+            clientDepart = self.trajet[0]
+            for i in range(1, len(self.trajet)):
+                clientArrivee = self.trajet[i]
 
                 time = distFunction(clientDepart.getIndice(),
                                     clientArrivee.getIndice()) / self.vehicle.getSpeed() * 60  # min
                 self.duration += time
+                # Pas de temps de collecte au depot !!!
+                # if clientArrivee.getIndice() != 0:
                 self.duration += self.vehicle.getFixedCollectionTime()
                 self.duration += self.vehicle.getCollectionTimePerCrate() * clientArrivee.getQuantity()
+
+                clientDepart = clientArrivee
 
         return self.duration
 

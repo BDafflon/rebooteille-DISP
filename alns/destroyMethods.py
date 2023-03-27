@@ -320,10 +320,12 @@ def destroy_route(solution, depot):
     Named 'destroyroute' in the report
 
     FR :
-    Detruit une route aleatoire dans la solution. Le nb de clients detruits ne depend pas du degrès de destruction mais du nombre de clients de la route detruite.
+    Detruit une route aleatoire dans la solution. Le nb de clients detruits ne depend pas du degrès de destruction
+    mais du nombre de clients de la route detruite.
 
     EN :
-    Destroys a random route in the solution. The number of customers destroyed does not depend on the degree of destruction but on the number of customers on the destroyed route.
+    Destroys a random route in the solution. The number of customers destroyed does not depend on the degree of
+    destruction but on the number of customers on the destroyed route.
     """
     timeSlot = solution.listTimeSlot[random.randint(0, len(solution.listTimeSlot) - 1)]
     route = timeSlot.listRoute[random.randint(0, len(timeSlot.listRoute) - 1)]

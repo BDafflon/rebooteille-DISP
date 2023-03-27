@@ -19,7 +19,7 @@ def writeClient(client, order):
     dictClient = {
         "id": client.getIndice(),
         "order": order,
-        "name": "point",
+        "name": client.name,
         "latitude": client.location[0],
         "longitude": client.location[1]
     }

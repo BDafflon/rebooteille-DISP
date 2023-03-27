@@ -5,11 +5,13 @@ import geopy.distance as gd
 
 
 class Instance:
-    def __init__(self, listClient, listVehicle, numberTimeSlotMax, routePerTimeSlotMax, durationTimeSlotMax, distTravel={}, name="present"):
+    def __init__(self, listClient, listVehicle, numberTimeSlotMax=1, routePerTimeSlotMax=10, durationTimeSlotMax=420,
+                 distTravel=None, name="present"):
         self.listClient = listClient
         self.listVehicle = listVehicle
-        if len(distTravel) == 0:
-            self.distTravel = {(i.getIndice(), j.getIndice()): gd.geodesic(i.location, j.location).km for i in listClient for j in listClient}
+        if distTravel is None:
+            self.distTravel = {(i.getIndice(), j.getIndice()): gd.geodesic(i.location, j.location).km
+                               for i in listClient for j in listClient}
         else:
             self.distTravel = distTravel
         self.name = name
