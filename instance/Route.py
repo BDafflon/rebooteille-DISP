@@ -9,6 +9,9 @@ class Route:
     def __init__(self, vehicle):
         self.vehicle = vehicle
         self.trajet = []
+        self.startTime = [] # minutes au plus tôt de début de collecte
+        self.endTime = [] # minutes au plus tard de fin de collecte
+        self.delta = [] # minutes nécessaires à la collecte
         self.totalQuantity = 0
         self.duration = 0
         self.indice = Route.INDICE
@@ -70,6 +73,41 @@ class Route:
 
         return self.duration
 
+    def updateTimetables(self, distFunction):
+        # initialisation de début de collecte au plus tôt = heure d'ouverture
+        self.startTime = [client.morningOpening for client in self.trajet]
+        # initialisation de fin de collecte au plus tard = heure de fermeture
+        self.endTime = [client.morningClosing for client in self.trajet]
+        # minutes nécessaires à la collecte = temps fixe dépendant du véhicule
+        # + temps de chargement proportionnel au nombre de caisses
+        self.delta = [0] + [self.vehicle.getFixedCollectionTime()
+                            + self.vehicle.getCollectionTimePerCrate() * client.getQuantity()
+                            for client in self.trajet[1:-1]] + [0]
+        size = len(self.trajet)
+        if size <= 2:
+            return
+        for i in range(1, size):
+            # earliest start
+            previousClientId = self.trajet[i - 1].getIndice()
+            clientId = self.trajet[i].getIndice()
+
+            arrivalTime = self.startTime[i - 1] + self.delta[i - 1]
+            arrivalTime += distFunction(previousClientId, clientId)
+            self.startTime[i] = max(self.startTime[i], arrivalTime)
+
+            # latest start
+            j = size - 1 - i
+            nextClientId = self.trajet[j + 1].getIndice()
+            clientId = self.trajet[j].getIndice()
+
+            departTime = self.endTime[j + 1] - self.delta[j + 1]
+            departTime -= distFunction(clientId, nextClientId)
+            self.endTime[j] = min(self.endTime[j], departTime)
+
+        self.startTime[0] = self.startTime[1] - distFunction(self.trajet[0].getIndice(), self.trajet[1].getIndice())
+        self.endTime[-1] = self.endTime[-2] + distFunction(self.trajet[-2].getIndice(), self.trajet[-1].getIndice())
+        self.endTime[-1] += self.delta[-1]
+
     def copy(self, routeToCopy):
         # Copie des variables
         self.indice = routeToCopy.indice
@@ -81,7 +119,7 @@ class Route:
         for clientToCopy in routeToCopy.trajet:
             self.appendClient(clientToCopy)
 
-    def display(self, positionInListTimeSlot=""):
+    def display(self, positionInListTimeSlot="", showTimeTable=False):
         print("\tRoute {i} :".format(i=positionInListTimeSlot))
         print("\t\t- Total Quantity = {q}".format(q=self.totalQuantity))
         print("\t\t- Duration = {d}".format(d=round(self.duration, 2)))
@@ -91,3 +129,18 @@ class Route:
         for client in self.trajet[1:]:
             route += " -> {i}".format(i=client.getIndice())
         print("\t\t- Trajet : {route}".format(route=route))
+        if showTimeTable:
+            print(self.delta)
+            for i in range(len(self.trajet)):
+                if i == 0:
+                    print("Collection routing starts between {earliestStart} and {latestStart}"
+                          .format(i=i, earliestStart=self.startTime[i], latestStart=self.endTime[i] - self.delta[i]))
+                elif i == len(self.trajet) - 1:
+                    print("Collection routing ends between {earliestStart} and {latestStart}"
+                          .format(i=i, earliestStart=self.startTime[i], latestStart=self.endTime[i] - self.delta[i]))
+                else:
+                    print("Collection of point {i} starts between {earliestStart} and {latestStart} and ends "
+                          "between {earliestEnd} and {latestEnd}".format(i=i, earliestStart=self.startTime[i],
+                                                                         latestStart=self.endTime[i] - self.delta[i],
+                                                                         earliestEnd=self.startTime[i] + self.delta[i],
+                                                                         latestEnd=self.endTime[i]))

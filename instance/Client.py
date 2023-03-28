@@ -4,17 +4,18 @@ Source from project ALNS 2022, ALEXI OMAR DJAMA
 
 
 class Client:
-    def __init__(self, indice=0, quantity=0, capacity=0, request=0, location=(0, 0), morningOpening=0, morningClosing=0, afternoonOpening=12, afternoonClosing=12, name="point"):
+    def __init__(self, indice=0, quantity=0, capacity=0, request=0, location=(0, 0), morningOpening=0,
+                 morningClosing=0, afternoonOpening=12, afternoonClosing=12, name="point"):
         self.indice = indice
         self.name = name
         self.location = location
         self.quantity = quantity
         self.capacity = capacity
         self.request = request
-        self.morningOpening = morningOpening
-        self.morningClosing = morningClosing
-        self.afternoonOpening = afternoonOpening
-        self.afternoonClosing = afternoonClosing
+        self.morningOpening = morningOpening * 60 # min
+        self.morningClosing = morningClosing * 60 # min
+        self.afternoonOpening = afternoonOpening * 60 # min
+        self.afternoonClosing = afternoonClosing * 60 # min
         self.visited = False
 
     def getIndice(self):

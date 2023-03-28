@@ -12,33 +12,51 @@ class Solution:
     facteurZ3 = 10
     facteurZ4 = 1
 
-    def __init__(self, instance=None, time=0):
+    def __init__(self, instance=None):
         self.instance = instance
         self.listTimeSlot = []
-        self.cost = 0
+        self.cost = -1
         self.updateCost = False
-        self.duration = 0  # Z1
-        self.requestPriorityPenalty = 0  # Z2
-        self.inventoryPriorityPenalty = 0  # Z3
+        self.duration = -1  # Z1
+        self.requestPriorityPenalty = -1  # Z2
+        self.inventoryPriorityPenalty = -1  # Z3
         # Z4 = len(self.listTimeSlot)
-        self.time = time
-        self.nIter = 6000
-        self.pu = 100
-        self.rho = 0.3
-        self.sigma1 = 130
-        self.sigma2 = 70
-        self.sigma3 = 25
-        self.tau = 0.1
-        self.c = 0.9995
-        self.alpha = 0.5
-        self.beta = 0.25
-        self.gamma = 0.25
-        self.nc = 2000
-        self.theta = 0.5  # swaps
-        self.ns = 10  # swaps
+        self.foundTime = -1
+        self.totalTime = -1
+        self.nIter = -1
+        self.pu = -1
+        self.rho = -1
+        self.sigma1 = -1
+        self.sigma2 = -1
+        self.sigma3 = -1
+        self.tau = -1
+        self.c = -1
+        self.alpha = -1
+        self.beta = -1
+        self.gamma = -1
+        self.nc = -1
+        self.theta = -1
+        self.ns = -1
 
-    def setTime(self, time):
-        self.time = time
+    def setTime(self, foundTime, totalTime):
+        self.foundTime = foundTime
+        self.totalTime = totalTime
+
+    def setParameters(self, nIter, pu, rho, sigma1, sigma2, sigma3, tau, c, alpha, beta, gamma, nc, theta, ns):
+        self.nIter = nIter
+        self.pu = pu
+        self.rho = rho
+        self.sigma1 = sigma1
+        self.sigma2 = sigma2
+        self.sigma3 = sigma3
+        self.tau = tau
+        self.c = c
+        self.alpha = alpha
+        self.beta = beta
+        self.gamma = gamma
+        self.nc = nc
+        self.theta = theta
+        self.ns = ns
 
     def getCost(self):
         if self.updateCost:
@@ -64,7 +82,7 @@ class Solution:
     def copy(self, solutionToCopy):
         # Copie des variables
         self.instance = solutionToCopy.instance
-        self.time = solutionToCopy.time
+        self.foundTime = solutionToCopy.foundTime
 
         # Copie des timeslots
         self.listTimeSlot = []

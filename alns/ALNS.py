@@ -426,9 +426,7 @@ class ALNS:
 
                     # mise à jour des variables d'informations
                     self.evolution_cost.append(round(self.bestSolution.calculateCost(), 2))
-                    currentTime = round(time.perf_counter() - initialTime, 3)
-                    self.bestSolution.setTime(currentTime)
-                    self.evolution_time_best.append(currentTime)
+                    self.evolution_time_best.append(round(time.perf_counter() - initialTime, 3))
                     self.USED_METHODS_UNTIL_LAST_BEST = copy.deepcopy(self.USED_METHODS)
                     nbIterationSinceLastBest = 0
                     self.evolution_iter_best.append(nbIteration + 1)
@@ -473,6 +471,8 @@ class ALNS:
                                                                   nbr=self.onremontelapente))
                 self.onremontelapente = 0
 
+        self.bestSolution.setTime(self.evolution_time_best[-1], round(time.perf_counter() - initialTime, 3))
+        self.bestSolution.setParameters(self.nIter, PU, rho, sigma1, sigma2, sigma3, tolerance, C, alpha, beta, gamma, Nc, theta, Ns)
         return self.bestSolution
 
     def display(self):

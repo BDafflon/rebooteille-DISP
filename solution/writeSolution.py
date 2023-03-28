@@ -73,7 +73,8 @@ def toJson(solution, solutionPath="./result/", fileName=None):
         "K3": Solution.facteurZ3,
         "K4": Solution.facteurZ4,
         "cost": solution.getCost(),
-        "time": solution.time,
+        "found time": solution.foundTime,
+        "total time": solution.totalTime,
         "routing": []
     }
     for idTimeSlot in range(len(solution.getListTimeSlot())):
@@ -102,7 +103,7 @@ def toCsv(solution, solutionPath="./result/", fileName=None, reset=False):
         line = "{cost}; {time}; {duration}; {request}; {inventory}; " \
                "{timeSlots}; {nIter}; {pu}; {rho}; {sigma1}; {sigma2}; {sigma3}; {tau}; " \
                "{c}; {alpha}; {beta}; {gamma}; {nc}; {theta}; {ns}\n".format(cost=solution.cost,
-                                                                             time=solution.time,
+                                                                             time=solution.foundTime,
                                                                              duration=solution.duration,
                                                                              request=solution.requestPriorityPenalty,
                                                                              inventory=solution.inventoryPriorityPenalty,

@@ -30,10 +30,10 @@ class TimeSlot:
             i += 1
         self.listRoute.pop(i)
 
-    def getDuration(self, timeFunction):
+    def getDuration(self, distFunction):
         sum = 0
         for route in self.listRoute:
-            sum += route.getDuration(timeFunction)
+            sum += route.getDuration(distFunction)
         self.duration = sum
         return self.duration
 
