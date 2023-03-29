@@ -18,7 +18,7 @@ def setup():
     core.memory("metaParametresNb", 13)
     core.memory("metaParametresHistorique", [])
 
-    core.memory("bestFintness", 89999999999999999999999999)
+    core.memory("bestFitness", 89999999999999999999999999)
     core.memory("bestMetaParametres", [])
 
     core.memory("popSize", 5)

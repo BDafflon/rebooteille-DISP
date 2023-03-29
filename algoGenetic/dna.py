@@ -20,9 +20,12 @@ class Dna:
     def calculateFitness(self):
         instance = parse("data/Medium6/")
         alns = ALNS(instance)
-        solution = alns.solve(100, 0.33, 130, 70, 25, self.gene[0], self.gene[1], self.gene[2],
-                              self.gene[3], self.gene[4], 2000, self.gene[5], self.gene[6])
-        self.fitness = solution.getCost()
+        meanCost = 0
+        for i in range(10):
+            solution = alns.solve(100, 0.33, 130, 70, 25, self.gene[0], self.gene[1], self.gene[2],
+                                  self.gene[3], self.gene[4], 2000, self.gene[5], self.gene[6])
+            meanCost += solution.getCost()
+        self.fitness = meanCost/10
 
     def crossover(self, partner):
         gene = []
