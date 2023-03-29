@@ -1,0 +1,13 @@
+Name,Adresse 1,Adresse 2,Code Postal,Ville,Dép.,Nb Casiers,Quantité,Heure d'ouverture collecte,latitude,longitude,Requête,morningOpening,morningClosing,afternoonOpening,afternoonClosing
+D'ox epicerie,7 Rue Laporte,,69009.0,Lyon,RHÔNE,11,11,9h-19h,45.778544,4.804728,0,9,12,12,17
+Bieristan,14 Rue Paul Lafargue,,69100.0,Villeurbanne,RHÔNE,12,8,9h-19h,45.767896,4.883564,1,9,12,12,17
+Prairial,10 Rue des Droits de l'Homme,,69120.0,Vaulx-en-Velin,RHÔNE,8,8,9h-19h,45.766869,4.927256,1,9,12,12,17
+Passion biere,72 Avenue de Verdun,,69330.0,Meyzieu,RHÔNE,14,12,9h-19h,45.777186,4.992969,0,9,12,12,17
+Nomad Brewery,388 rue Antoine Pinay,,69740.0,Genas,RHÔNE,14,10,9h-19h,45.730658,4.984589,0,9,12,12,17
+3 ptits pois,124 Rue Sébastien Gryphe ,,69007.0,Lyon,RHÔNE,13,11,9h-19h,45.748314,4.839258,1,9,12,12,17
+LE COURT CIRCUIT, 13 rue Jangot,,69007.0,Lyon,RHÔNE,11,8,9h-19h,45.751669,4.843265,1,9,12,12,17
+Ninkasi Guillotière,,,,,RHÔNE,11,8,9h-19h,45.75617,4.841041,0,9,12,12,17
+Ninkasi Croix-Rousse,,,,,RHÔNE,9,8,9h-19h,45.758235,4.842257,1,9,12,12,17
+Ninkasi Gerland,,,,,RHÔNE,11,11,9h-19h,45.728207,4.830734,0,9,12,12,17
+Ninkasi Sans Souci,,,,,RHÔNE,11,8,9h-19h,45.748304,4.862841,1,9,12,12,17
+Ninkasi Gorge de Loup,,,,,RHÔNE,12,9,9h-19h,45.771424,4.805365,1,9,12,12,17

@@ -26,7 +26,8 @@ def check(solution, showLog=False, notSommetVisited=False):
         for route in timeSlot.getListRoute():
             # Si la route courante n'a que 2 clients alors elle ne passe par aucun point de collecte
             # Elle fait 0 → 0
-            if len(route.trajet) <= 2:
+            size = len(route.getTrajet())
+            if size <= 2:
                 # On peut donc la supprimer
                 timeSlot.removeFromListRoute(route)
                 # On lance un check de la solution modifiée
@@ -51,27 +52,19 @@ def check(solution, showLog=False, notSommetVisited=False):
                 return False
 
             '''Contrainte des horaires'''
-            """vehicle = route.vehicle
-            previousClient = route.getTrajet()[0]
-            firstStart = [previousClient.morningOpening]
-            lastStart = [previousClient.morningClosing]
-            for i in range(1, len(route.getTrajet())):
-                client = route.getTrajet()[i]
-                departTime = firstStart[i-1]
-                if previousClient.getIndice() != 0:
-                    departTime += vehicle.getFixedCollectionTime()
-                    departTime += vehicle.getCollectionTimePerCrate() * previousClient.getQuantity()
-                arrivalTime = departTime + solution.instance.getDistance(previousClient.getIndice(), client.getIndice())
-                firstStart.append(max(arrivalTime, client.morningOpening))
-                print(firstStart[i])
-                previousClient = client
-            """
+            route.updateTimetables(solution.instance.getDistance)
+
+            for i in range(size):
+                if route.startTime[i] > route.endTime[i] - route.delta[i]:
+                    if showLog:
+                        print("Solution non valide - Horaires non respectés")
+                    return False
+
             # Sauf si on spécifie de ne pas vérifier les sommets visités pour les opérateurs de réparation
             if not notSommetVisited:
                 # Validation du passage par le sommet
-                if len(route.getTrajet()) > 1:
-                    for client in route.getTrajet():
-                        client.setVisited()
+                for client in route.getTrajet():
+                    client.setVisited()
 
         '''Contrainte de durée du time slot'''
         durationTimeSlot = timeSlot.getDuration(solution.instance.getDistance)
